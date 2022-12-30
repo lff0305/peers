@@ -23,13 +23,13 @@ public class SipHeader {
 
     private SipHeaderFieldName name;
     private SipHeaderFieldValue value;
-    
+
     SipHeader(SipHeaderFieldName name, SipHeaderFieldValue value) {
         super();
         this.name = name;
         this.value = value;
     }
-    
+
     @Override
     public boolean equals(Object obj) {
         if (obj instanceof SipHeader) {
@@ -50,5 +50,5 @@ public class SipHeader {
     public void setValue(SipHeaderFieldValue value) {
         this.value = value;
     }
-    
+
 }

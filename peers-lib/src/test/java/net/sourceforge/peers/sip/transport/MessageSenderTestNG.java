@@ -21,6 +21,7 @@ package net.sourceforge.peers.sip.transport;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.lang.invoke.MethodHandles;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
@@ -29,20 +30,22 @@ import java.net.UnknownHostException;
 import java.util.Random;
 
 import net.sourceforge.peers.Config;
-import net.sourceforge.peers.FileLogger;
 import net.sourceforge.peers.JavaConfig;
-import net.sourceforge.peers.Logger;
 import net.sourceforge.peers.sip.syntaxencoding.SipParser;
 import net.sourceforge.peers.sip.syntaxencoding.SipParserException;
 import net.sourceforge.peers.sip.transaction.TransactionManager;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 public class MessageSenderTestNG {
-    
+
+    private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+
     private TransportManager transportManager;
-    
+
     private String message;
     private String expectedMessage;
     private volatile boolean messageReceived = false;
@@ -57,17 +60,18 @@ public class MessageSenderTestNG {
         config.setSipPort(localPort);
         config.setLocalInetAddress(InetAddress.getLocalHost());
         SipServerTransportUser sipServerTransportUser =
-            new SipServerTransportUser() {
-            @Override public void messageReceived(SipMessage sipMessage) {}
-        };
-        Logger logger = new FileLogger(null);
+                new SipServerTransportUser() {
+                    @Override
+                    public void messageReceived(SipMessage sipMessage) {
+                    }
+                };
         transportManager = new TransportManager(
-                new TransactionManager(logger),
-                config, logger);
+                new TransactionManager(),
+                config);
         transportManager.setSipServerTransportUser(sipServerTransportUser);
         transportManager.setSipPort(new Random().nextInt(65535));
     }
-    
+
     @Test(groups = "listen")
     public void listen() throws InterruptedException {
         Thread thread = new Thread(new Runnable() {
@@ -98,15 +102,15 @@ public class MessageSenderTestNG {
             Thread.sleep(50);
         }
     }
-    
+
     @Test(dependsOnGroups = {"listen"}, groups = "send")
     public void sendMessage() throws IOException, SipParserException {
         //TODO make parser throw sipparserexception with explicit message if first
         //line is incorrect, or if there is no via (no nullpointer exception!!)
         String testMessage = "MESSAGE sip:bob@bilox.com SIP/2.0\r\n" +
-            "Via: \r\n" +
-            "\r\n";
-        SipRequest sipRequest = (SipRequest)parse(testMessage);
+                "Via: \r\n" +
+                "\r\n";
+        SipRequest sipRequest = (SipRequest) parse(testMessage);
         assert sipRequest.getBody() == null;
         InetAddress inetAddress = InetAddress.getLocalHost();
         assert transportManager != null;
@@ -115,7 +119,7 @@ public class MessageSenderTestNG {
         messageSender.sendMessage(sipRequest);
         expectedMessage = sipRequest.toString();
     }
-    
+
     @Test(timeOut = 10000, dependsOnGroups = {"send"})
     public void checkAnswer() throws InterruptedException {
         while (!messageReceived) {
@@ -127,12 +131,12 @@ public class MessageSenderTestNG {
                 "differs from expected message length";
         assert message.equals(expectedMessage) : "message != expected message";
     }
-    
+
     private SipMessage parse(String message) throws IOException, SipParserException {
         ByteArrayInputStream bais = new ByteArrayInputStream(message.getBytes());
         SipParser sipParser = new SipParser();
         SipMessage sipMessage = sipParser.parse(bais);
         return sipMessage;
     }
-    
+
 }

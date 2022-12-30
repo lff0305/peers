@@ -20,18 +20,16 @@
 package net.sourceforge.peers.sip.core.useragent.handlers;
 
 import java.io.IOException;
+import java.lang.invoke.MethodHandles;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
-import java.security.AccessController;
-import java.security.PrivilegedAction;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Timer;
 
-import net.sourceforge.peers.Logger;
 import net.sourceforge.peers.media.MediaManager;
 import net.sourceforge.peers.sdp.Codec;
 import net.sourceforge.peers.sdp.MediaDestination;
@@ -63,27 +61,30 @@ import net.sourceforge.peers.sip.transport.MessageSender;
 import net.sourceforge.peers.sip.transport.SipRequest;
 import net.sourceforge.peers.sip.transport.SipResponse;
 import net.sourceforge.peers.sip.transport.TransportManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class InviteHandler extends DialogMethodHandler
         implements ServerTransactionUser, ClientTransactionUser {
+
+    private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
     public static final int TIMEOUT = 100;
 
     private MediaDestination mediaDestination;
     private Timer ackTimer;
     private boolean initialIncomingInvite;
-    
+
     public InviteHandler(UserAgent userAgent,
-            DialogManager dialogManager,
-            TransactionManager transactionManager,
-            TransportManager transportManager, Logger logger) {
-        super(userAgent, dialogManager, transactionManager, transportManager,
-                logger);
+                         DialogManager dialogManager,
+                         TransactionManager transactionManager,
+                         TransportManager transportManager) {
+        super(userAgent, dialogManager, transactionManager, transportManager);
         ackTimer = new Timer(getClass().getSimpleName() + " Ack "
                 + Timer.class.getSimpleName());
     }
-    
-    
+
+
     //////////////////////////////////////////////////////////
     // UAS methods
     //////////////////////////////////////////////////////////
@@ -95,16 +96,16 @@ public class InviteHandler extends DialogMethodHandler
                 RFC3261.CODE_180_RINGING, RFC3261.REASON_180_RINGING);
         Dialog dialog = buildDialogForUas(sipResponse, sipRequest);
         //here dialog is already stored in dialogs in DialogManager
-        
+
         InviteServerTransaction inviteServerTransaction = (InviteServerTransaction)
-            transactionManager.createServerTransaction(sipResponse,
-                    userAgent.getSipPort(), RFC3261.TRANSPORT_UDP, this,
-                    sipRequest);
-        
+                transactionManager.createServerTransaction(sipResponse,
+                        userAgent.getSipPort(), RFC3261.TRANSPORT_UDP, this,
+                        sipRequest);
+
         inviteServerTransaction.start();
-        
+
         inviteServerTransaction.receivedRequest(sipRequest);
-        
+
         //TODO send 180 more than once
         inviteServerTransaction.sendReponse(sipResponse);
 
@@ -121,9 +122,9 @@ public class InviteHandler extends DialogMethodHandler
         if (!peers.contains(responseTo)) {
             peers.add(responseTo);
         }
-        
+
     }
-    
+
     public void handleReInvite(SipRequest sipRequest, Dialog dialog) {
         logger.debug("handleReInvite");
         initialIncomingInvite = false;
@@ -131,7 +132,7 @@ public class InviteHandler extends DialogMethodHandler
 
         // 12.2.2 update dialog
         SipHeaderFieldValue contact =
-            sipHeaders.get(new SipHeaderFieldName(RFC3261.HDR_CONTACT));
+                sipHeaders.get(new SipHeaderFieldName(RFC3261.HDR_CONTACT));
         if (contact != null) {
             String contactStr = contact.getValue();
             if (contactStr.indexOf(RFC3261.LEFT_ANGLE_BRACKET) > -1) {
@@ -143,43 +144,31 @@ public class InviteHandler extends DialogMethodHandler
 
         // update session
         sendSuccessfulResponse(sipRequest, dialog);
-        
+
     }
 
     private DatagramSocket getDatagramSocket() {
-        DatagramSocket datagramSocket = userAgent.getMediaManager()
-                .getDatagramSocket();
+        DatagramSocket datagramSocket = userAgent.getMediaManager().getDatagramSocket();
         if (datagramSocket == null) { // initial invite success response
             // AccessController.doPrivileged added for plugin compatibility
-            datagramSocket = AccessController.doPrivileged(
-                new PrivilegedAction<DatagramSocket>() {
-
-                    @Override
-                    public DatagramSocket run() {
-                        DatagramSocket datagramSocket = null;
-                        int rtpPort = userAgent.getConfig().getRtpPort();
-                        try {
-                            if (rtpPort == 0) {
-                                int localPort = -1;
-                                while (localPort % 2 != 0) {
-                                    datagramSocket = new DatagramSocket();
-                                    localPort = datagramSocket.getLocalPort();
-                                    if (localPort % 2 != 0) {
-                                        datagramSocket.close();
-                                    }
-                                }
-                            } else {
-                                datagramSocket = new DatagramSocket(rtpPort);
-                            }
-                        } catch (SocketException e) {
-                            logger.error("cannot create datagram socket ", e);
+            int rtpPort = userAgent.getConfig().getRtpPort();
+            try {
+                if (rtpPort == 0) {
+                    int localPort = -1;
+                    while (localPort % 2 != 0) {
+                        datagramSocket = new DatagramSocket();
+                        localPort = datagramSocket.getLocalPort();
+                        if (localPort % 2 != 0) {
+                            datagramSocket.close();
                         }
- 
-                        return datagramSocket;
                     }
+                } else {
+                    datagramSocket = new DatagramSocket(rtpPort);
                 }
-            );
-            logger.debug("new rtp DatagramSocket " + datagramSocket.hashCode());
+            } catch (SocketException e) {
+                logger.error("cannot create datagram socket ", e);
+            }
+            logger.info("new rtp DatagramSocket {} on {}", datagramSocket.hashCode(), datagramSocket.getLocalPort());
             try {
                 datagramSocket.setSoTimeout(TIMEOUT);
             } catch (SocketException e) {
@@ -193,9 +182,9 @@ public class InviteHandler extends DialogMethodHandler
     private synchronized void sendSuccessfulResponse(SipRequest sipRequest, Dialog dialog) {
         SipHeaders reqHeaders = sipRequest.getSipHeaders();
         SipHeaderFieldValue contentType =
-            reqHeaders.get(new SipHeaderFieldName(RFC3261.HDR_CONTENT_TYPE));
-        
-        
+                reqHeaders.get(new SipHeaderFieldName(RFC3261.HDR_CONTENT_TYPE));
+
+
         if (RFC3261.CONTENT_TYPE_SDP.equals(contentType)) {
             //TODO
 //            String sdpResponse;
@@ -212,20 +201,20 @@ public class InviteHandler extends DialogMethodHandler
 
         //TODO if mode autoanswer just send 200 without asking any question
         SipResponse sipResponse =
-            RequestManager.generateResponse(
-                    sipRequest,
-                    dialog,
-                    RFC3261.CODE_200_OK,
-                    RFC3261.REASON_200_OK);
+                RequestManager.generateResponse(
+                        sipRequest,
+                        dialog,
+                        RFC3261.CODE_200_OK,
+                        RFC3261.REASON_200_OK);
 
         // TODO 13.3 dialog invite-specific processing
-        
+
         // TODO timer if there is an Expires header in INVITE
-        
+
         // TODO 3xx
-        
+
         // TODO 486 or 600
-        
+
         byte[] offerBytes = sipRequest.getBody();
         SessionDescription answer;
         try {
@@ -252,11 +241,11 @@ public class InviteHandler extends DialogMethodHandler
         } catch (IOException e) {
             logger.error(e.getMessage(), e);
         }
-        
+
         SipHeaders respHeaders = sipResponse.getSipHeaders();
         respHeaders.add(new SipHeaderFieldName(RFC3261.HDR_CONTENT_TYPE),
                 new SipHeaderFieldValue(RFC3261.CONTENT_TYPE_SDP));
-        
+
         ArrayList<String> routeSet = dialog.getRouteSet();
         if (routeSet != null) {
             SipHeaderFieldName recordRoute = new SipHeaderFieldName(RFC3261.HDR_RECORD_ROUTE);
@@ -264,7 +253,7 @@ public class InviteHandler extends DialogMethodHandler
                 respHeaders.add(recordRoute, new SipHeaderFieldValue(route));
             }
         }
-        
+
         // TODO determine port and transport for server transaction>transport
         // from initial invite
         // FIXME determine port and transport for server transaction>transport
@@ -273,14 +262,14 @@ public class InviteHandler extends DialogMethodHandler
         if (serverTransaction == null) {
             // in re-INVITE case, no serverTransaction has been created
             serverTransaction = (InviteServerTransaction)
-            transactionManager.createServerTransaction(sipResponse,
-                    userAgent.getSipPort(), RFC3261.TRANSPORT_UDP, this,
-                    sipRequest);
+                    transactionManager.createServerTransaction(sipResponse,
+                            userAgent.getSipPort(), RFC3261.TRANSPORT_UDP, this,
+                            sipRequest);
         }
         serverTransaction.start();
-        
+
         serverTransaction.receivedRequest(sipRequest);
-        
+
         serverTransaction.sendReponse(sipResponse);
         // TODO manage retransmission of the response (send to the transport)
         // until ACK arrives, if no ACK is received within 64*T1, confirm dialog
@@ -292,61 +281,60 @@ public class InviteHandler extends DialogMethodHandler
 
     public void acceptCall(SipRequest sipRequest, Dialog dialog) {
         sendSuccessfulResponse(sipRequest, dialog);
-        
+
         dialog.receivedOrSent2xx();
 //        logger.getInstance().debug("dialog state: " + dialog.getState());
 //        logger.getInstance().debug("after dialog.receivedOrSent2xx();");
-        
+
 //        setChanged();
 //        notifyObservers(sipRequest);
     }
-    
+
     public void rejectCall(SipRequest sipRequest) {
         //TODO generate 486, etc.
         SipHeaders reqHeaders = sipRequest.getSipHeaders();
         SipHeaderFieldValue callId = reqHeaders.get(
                 new SipHeaderFieldName(RFC3261.HDR_CALLID));
-        
+
         Dialog dialog = dialogManager.getDialog(callId.getValue());
-        
+
         //TODO manage auto reject Do not disturb (DND)
         SipResponse sipResponse =
-            RequestManager.generateResponse(
-                    sipRequest,
-                    dialog,
-                    RFC3261.CODE_486_BUSYHERE,
-                    RFC3261.REASON_486_BUSYHERE);
-        
+                RequestManager.generateResponse(
+                        sipRequest,
+                        dialog,
+                        RFC3261.CODE_486_BUSYHERE,
+                        RFC3261.REASON_486_BUSYHERE);
+
         // TODO determine port and transport for server transaction>transport
         // from initial invite
         // FIXME determine port and transport for server transaction>transport
         ServerTransaction serverTransaction = transactionManager
                 .getServerTransaction(sipRequest);
-        
+
         serverTransaction.start();
-        
+
         serverTransaction.receivedRequest(sipRequest);
-        
+
         serverTransaction.sendReponse(sipResponse);
-        
+
         dialog.receivedOrSent300To699();
-        
+
         userAgent.getMediaManager().setDatagramSocket(null);
 //        setChanged();
 //        notifyObservers(sipRequest);
     }
-    
+
     //////////////////////////////////////////////////////////
     // UAC methods
     //////////////////////////////////////////////////////////
-    
+
     public ClientTransaction preProcessInvite(SipRequest sipRequest)
             throws SipUriSyntaxException {
-        
+
         //8.1.2
         SipHeaders requestHeaders = sipRequest.getSipHeaders();
-        SipURI destinationUri = RequestManager.getDestinationUri(sipRequest,
-                logger);
+        SipURI destinationUri = RequestManager.getDestinationUri(sipRequest);
 
         //TODO if header route is present, addrspec = toproute.nameaddress.addrspec
 
@@ -355,7 +343,7 @@ public class InviteHandler extends DialogMethodHandler
         if (params != null) {
             String reqUriTransport = params.get(RFC3261.PARAM_TRANSPORT);
             if (reqUriTransport != null) {
-                transport = reqUriTransport; 
+                transport = reqUriTransport;
             }
         }
         int port = destinationUri.getPort();
@@ -375,15 +363,15 @@ public class InviteHandler extends DialogMethodHandler
         }
         ClientTransaction clientTransaction = transactionManager
                 .createClientTransaction(sipRequest, inetAddress,
-                    port, transport, null, this);
+                        port, transport, null, this);
         DatagramSocket datagramSocket;
         synchronized (this) {
             datagramSocket = getDatagramSocket();
         }
         try {
             SessionDescription sessionDescription =
-                sdpManager.createSessionDescription(null,
-                        datagramSocket.getLocalPort());
+                    sdpManager.createSessionDescription(null,
+                            datagramSocket.getLocalPort());
             sipRequest.setBody(sessionDescription.toString().getBytes());
         } catch (IOException e) {
             logger.error(e.getMessage(), e);
@@ -392,7 +380,7 @@ public class InviteHandler extends DialogMethodHandler
                 new SipHeaderFieldValue(RFC3261.CONTENT_TYPE_SDP));
         return clientTransaction;
     }
-    
+
     public void preProcessReInvite(SipRequest sipRequest) {
         //TODO
     }
@@ -412,8 +400,8 @@ public class InviteHandler extends DialogMethodHandler
                 || statusCode == RFC3261.CODE_407_PROXY_AUTHENTICATION_REQUIRED
                 && !challenged) {
             InviteClientTransaction inviteClientTransaction =
-                (InviteClientTransaction)
-                transactionManager.getClientTransaction(sipResponse);
+                    (InviteClientTransaction)
+                            transactionManager.getClientTransaction(sipResponse);
             SipRequest sipRequest = inviteClientTransaction.getRequest();
             String password = userAgent.getConfig().getPassword();
             if (password != null && !"".equals(password.trim())) {
@@ -453,11 +441,11 @@ public class InviteHandler extends DialogMethodHandler
                 //TODO maybe stop retransmissions
             }
         }
-        
+
         if (dialog != null) {
             buildOrUpdateDialogForUac(sipResponse, transaction);
         }
-        
+
 //        
 //        if (dialog == null && sipResponse.getStatusCode() != RFC3261.CODE_100_TRYING) {
 //            logger.debug("dialog not found for prov response");
@@ -496,14 +484,10 @@ public class InviteHandler extends DialogMethodHandler
         if (!RFC3261.METHOD_INVITE.equals(method)) {
             return;
         }
-        
+
         challenged = false;
-        
-        
-        
-        
-        
-        
+
+
         //13.2.2.4
 
         List<String> peers = userAgent.getPeers();
@@ -516,15 +500,15 @@ public class InviteHandler extends DialogMethodHandler
             ackTimer.schedule(new AckTimerTask(responseTo),
                     64 * RFC3261.TIMER_T1);
         }
-        
+
         Dialog dialog = dialogManager.getDialog(sipResponse);
-        
+
         if (dialog != null) {
             //dialog already created with a 180 for example
             dialog.setRouteSet(computeRouteSet(sipResponse.getSipHeaders()));
         }
         dialog = buildOrUpdateDialogForUac(sipResponse, transaction);
-        
+
         SipListener sipListener = userAgent.getSipListener();
         if (sipListener != null) {
             sipListener.calleePickup(sipResponse);
@@ -532,7 +516,7 @@ public class InviteHandler extends DialogMethodHandler
 
         //added for media
         SessionDescription sessionDescription =
-            sdpManager.parse(sipResponse.getBody());
+                sdpManager.parse(sipResponse.getBody());
         try {
             mediaDestination = sdpManager.getMediaDestination(sessionDescription);
         } catch (NoCodecException e) {
@@ -542,41 +526,41 @@ public class InviteHandler extends DialogMethodHandler
         int remotePort = mediaDestination.getPort();
         Codec codec = mediaDestination.getCodec();
         String localAddress = userAgent.getConfig()
-            .getLocalInetAddress().getHostAddress();
+                .getLocalInetAddress().getHostAddress();
 
         userAgent.getMediaManager().successResponseReceived(localAddress,
                 remoteAddress, remotePort, codec);
-        
+
         //switch to confirmed state
         dialog.receivedOrSent2xx();
-        
+
         //generate ack
         //p. 82 §3
         SipRequest ack = dialog.buildSubsequentRequest(RFC3261.METHOD_ACK);
-        
-        
+
+
         //update CSeq
-        
+
         SipHeaders ackHeaders = ack.getSipHeaders();
         SipHeaderFieldName cseqName = new SipHeaderFieldName(RFC3261.HDR_CSEQ);
         SipHeaderFieldValue ackCseq = ackHeaders.get(cseqName);
-        
+
         SipRequest request = transaction.getRequest();
         SipHeaders requestHeaders = request.getSipHeaders();
         SipHeaderFieldValue requestCseq = requestHeaders.get(cseqName);
-        
+
         ackCseq.setValue(requestCseq.toString().replace(RFC3261.METHOD_INVITE, RFC3261.METHOD_ACK));
-        
+
         //add Via with only the branchid parameter
-        
+
         SipHeaderFieldValue via = new SipHeaderFieldValue("");
         SipHeaderParamName branchIdName = new SipHeaderParamName(RFC3261.PARAM_BRANCH);
         via.addParam(branchIdName, Utils.generateBranchId());
-        
+
         ackHeaders.add(new SipHeaderFieldName(RFC3261.HDR_VIA), via, 0);
 
         //TODO authentication headers
-        
+
         if (request.getBody() == null && sipResponse.getBody() != null) {
             //TODO add a real SDP answer
             ack.setBody(sipResponse.getBody());
@@ -584,17 +568,17 @@ public class InviteHandler extends DialogMethodHandler
 
         //TODO check if sdp is acceptable
 
-        SipURI destinationUri = RequestManager.getDestinationUri(ack, logger);
+        SipURI destinationUri = RequestManager.getDestinationUri(ack);
         challengeManager.postProcess(ack);
 
         //TODO if header route is present, addrspec = toproute.nameaddress.addrspec
-        
+
         String transport = RFC3261.TRANSPORT_UDP;
         Hashtable<String, String> params = destinationUri.getUriParameters();
         if (params != null) {
             String reqUriTransport = params.get(RFC3261.PARAM_TRANSPORT);
             if (reqUriTransport != null) {
-                transport = reqUriTransport; 
+                transport = reqUriTransport;
             }
         }
         int port = destinationUri.getPort();
@@ -620,16 +604,15 @@ public class InviteHandler extends DialogMethodHandler
         } catch (IOException e) {
             logger.error("input/output error", e);
         }
-        
-        
-        
+
+
         List<String> guiClosedCallIds = userAgent.getUac().getGuiClosedCallIds();
         String callId = Utils.getMessageCallId(sipResponse);
         if (guiClosedCallIds.contains(callId)) {
             userAgent.terminate(request);
         }
-        
-        
+
+
     }
 
     public void handleAck(SipRequest ack, Dialog dialog) {
@@ -642,7 +625,7 @@ public class InviteHandler extends DialogMethodHandler
         if (mediaDestination == null) {
             SipHeaders reqHeaders = ack.getSipHeaders();
             SipHeaderFieldValue contentType =
-                reqHeaders.get(new SipHeaderFieldName(RFC3261.HDR_CONTENT_TYPE));
+                    reqHeaders.get(new SipHeaderFieldName(RFC3261.HDR_CONTENT_TYPE));
             byte[] offerBytes = ack.getBody();
 
             if (offerBytes != null && contentType != null &&
@@ -660,7 +643,7 @@ public class InviteHandler extends DialogMethodHandler
         String destAddress = mediaDestination.getDestination();
         int destPort = mediaDestination.getPort();
         Codec codec = mediaDestination.getCodec();
-        
+
         MediaManager mediaManager = userAgent.getMediaManager();
         if (initialIncomingInvite) {
             mediaManager.handleAck(destAddress, destPort, codec);
@@ -672,22 +655,22 @@ public class InviteHandler extends DialogMethodHandler
 
     public void transactionTimeout(ClientTransaction clientTransaction) {
         // TODO Auto-generated method stub
-        
+
     }
 
     public void transactionTransportError() {
         // TODO Auto-generated method stub
-        
+
     }
-    
+
     //////////////////////////////////////////////////////////
     // ServerTransactionUser methods
     //////////////////////////////////////////////////////////
-    
+
     public void transactionFailure() {
         // TODO manage transaction failure (ACK was not received)
-        
+
     }
-    
+
 
 }

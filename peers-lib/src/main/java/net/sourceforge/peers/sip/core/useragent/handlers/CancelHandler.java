@@ -19,7 +19,6 @@
 
 package net.sourceforge.peers.sip.core.useragent.handlers;
 
-import net.sourceforge.peers.Logger;
 import net.sourceforge.peers.sip.RFC3261;
 import net.sourceforge.peers.sip.Utils;
 import net.sourceforge.peers.sip.core.useragent.MidDialogRequestManager;
@@ -40,15 +39,20 @@ import net.sourceforge.peers.sip.transactionuser.DialogManager;
 import net.sourceforge.peers.sip.transport.SipRequest;
 import net.sourceforge.peers.sip.transport.SipResponse;
 import net.sourceforge.peers.sip.transport.TransportManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.lang.invoke.MethodHandles;
 
 public class CancelHandler extends DialogMethodHandler
         implements ServerTransactionUser {
 
+    private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+
     public CancelHandler(UserAgent userAgent, DialogManager dialogManager,
-            TransactionManager transactionManager,
-            TransportManager transportManager, Logger logger) {
-        super(userAgent, dialogManager, transactionManager, transportManager,
-                logger);
+                         TransactionManager transactionManager,
+                         TransportManager transportManager) {
+        super(userAgent, dialogManager, transactionManager, transportManager);
     }
 
     //////////////////////////////////////////////////////////
@@ -60,8 +64,8 @@ public class CancelHandler extends DialogMethodHandler
         String branchId = topVia.getParam(new SipHeaderParamName(
                 RFC3261.PARAM_BRANCH));
         InviteServerTransaction inviteServerTransaction =
-            (InviteServerTransaction)transactionManager
-                .getServerTransaction(branchId,RFC3261.METHOD_INVITE);
+                (InviteServerTransaction) transactionManager
+                        .getServerTransaction(branchId, RFC3261.METHOD_INVITE);
         SipResponse cancelResponse;
         if (inviteServerTransaction == null) {
             //TODO generate CANCEL 481 Call Leg/Transaction Does Not Exist
@@ -82,19 +86,19 @@ public class CancelHandler extends DialogMethodHandler
         if (cancelResponse.getStatusCode() != RFC3261.CODE_200_OK) {
             return;
         }
-        
+
         SipResponse lastResponse = inviteServerTransaction.getLastResponse();
         if (lastResponse != null &&
                 lastResponse.getStatusCode() >= RFC3261.CODE_200_OK) {
             return;
         }
-        
+
         SipResponse inviteResponse = buildGenericResponse(
                 inviteServerTransaction.getRequest(),
                 RFC3261.CODE_487_REQUEST_TERMINATED,
                 RFC3261.REASON_487_REQUEST_TERMINATED);
         inviteServerTransaction.sendReponse(inviteResponse);
-        
+
         Dialog dialog = dialogManager.getDialog(lastResponse);
         dialog.receivedOrSent300To699();
 
@@ -103,20 +107,20 @@ public class CancelHandler extends DialogMethodHandler
             sipListener.remoteHangup(sipRequest);
         }
     }
-    
+
     //////////////////////////////////////////////////////////
     // UAC methods
     //////////////////////////////////////////////////////////
-    
+
     public ClientTransaction preProcessCancel(SipRequest cancelGenericRequest,
-            SipRequest inviteRequest,
-            MidDialogRequestManager midDialogRequestManager) {
+                                              SipRequest inviteRequest,
+                                              MidDialogRequestManager midDialogRequestManager) {
         //TODO
         //p. 54 §9.1
-        
+
         SipHeaders cancelHeaders = cancelGenericRequest.getSipHeaders();
         SipHeaders inviteHeaders = inviteRequest.getSipHeaders();
-        
+
         //cseq
         SipHeaderFieldName cseqName = new SipHeaderFieldName(RFC3261.HDR_CSEQ);
         SipHeaderFieldValue cancelCseq = cancelHeaders.get(cseqName);
@@ -124,7 +128,7 @@ public class CancelHandler extends DialogMethodHandler
         cancelCseq.setValue(inviteCseq.getValue().replace(RFC3261.METHOD_INVITE,
                 RFC3261.METHOD_CANCEL));
 
-        
+
         //from
         SipHeaderFieldName fromName = new SipHeaderFieldName(RFC3261.HDR_FROM);
         SipHeaderFieldValue cancelFrom = cancelHeaders.get(fromName);
@@ -133,13 +137,13 @@ public class CancelHandler extends DialogMethodHandler
         SipHeaderParamName tagParam = new SipHeaderParamName(RFC3261.PARAM_TAG);
         cancelFrom.removeParam(tagParam);
         cancelFrom.addParam(tagParam, inviteFrom.getParam(tagParam));
-        
+
         //top-via
 //        cancelHeaders.add(new SipHeaderFieldName(RFC3261.HDR_VIA),
 //                Utils.getInstance().getTopVia(inviteRequest));
         SipHeaderFieldValue topVia = Utils.getTopVia(inviteRequest);
         String branchId = topVia.getParam(new SipHeaderParamName(RFC3261.PARAM_BRANCH));
-        
+
         //route
         SipHeaderFieldName routeName = new SipHeaderFieldName(RFC3261.HDR_ROUTE);
         SipHeaderFieldValue inviteRoute = inviteHeaders.get(routeName);
@@ -148,8 +152,8 @@ public class CancelHandler extends DialogMethodHandler
         }
 
         InviteClientTransaction inviteClientTransaction =
-            (InviteClientTransaction)transactionManager.getClientTransaction(
-                    inviteRequest);
+                (InviteClientTransaction) transactionManager.getClientTransaction(
+                        inviteRequest);
         if (inviteClientTransaction != null) {
             SipResponse lastResponse = inviteClientTransaction.getLastResponse();
             if (lastResponse != null &&
@@ -167,6 +171,6 @@ public class CancelHandler extends DialogMethodHandler
 
     public void transactionFailure() {
         // TODO Auto-generated method stub
-        
+
     }
 }

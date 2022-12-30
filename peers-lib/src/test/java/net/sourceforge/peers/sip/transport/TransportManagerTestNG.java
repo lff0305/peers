@@ -21,27 +21,30 @@ package net.sourceforge.peers.sip.transport;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.lang.invoke.MethodHandles;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 
 import net.sourceforge.peers.Config;
-import net.sourceforge.peers.FileLogger;
 import net.sourceforge.peers.JavaConfig;
-import net.sourceforge.peers.Logger;
 import net.sourceforge.peers.sip.syntaxencoding.SipParser;
 import net.sourceforge.peers.sip.syntaxencoding.SipParserException;
 import net.sourceforge.peers.sip.transaction.TransactionManager;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
 public class TransportManagerTestNG {
 
+    private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+
     private TransportManager transportManager;
     private volatile int port;
-    
+
     @BeforeTest
     protected void init() throws UnknownHostException, SocketException {
         DatagramSocket datagramSocket = new DatagramSocket();
@@ -50,12 +53,11 @@ public class TransportManagerTestNG {
         Config config = new JavaConfig();
         config.setSipPort(port);
         config.setLocalInetAddress(InetAddress.getLocalHost());
-        Logger logger = new FileLogger(null);
         transportManager = new TransportManager(
-                new TransactionManager(logger),
-                config, logger);
+                new TransactionManager(),
+                config);
     }
-    
+
     /*
      * FIXME issue with this test: several transport managers are created from
      * several tests. Then those transport managers are trying to create datagram
@@ -65,11 +67,11 @@ public class TransportManagerTestNG {
     public void testCreateClientTransport()
             throws IOException, SipParserException {
         String testMessage = "MESSAGE sip:bob@bilox.com SIP/2.0\r\n" +
-        "Via: \r\n" +
-        "\r\n";
+                "Via: \r\n" +
+                "\r\n";
         int port = 6061;
         InetAddress localHost = InetAddress.getLocalHost();
-        SipRequest sipRequest = (SipRequest)parse(testMessage);
+        SipRequest sipRequest = (SipRequest) parse(testMessage);
         MessageSender messageSender = transportManager.createClientTransport(
                 sipRequest, localHost, port, "UDP");
         assert messageSender != null;
@@ -79,14 +81,14 @@ public class TransportManagerTestNG {
         assert !"".equals(contact.trim());
         assert contact.indexOf(localHost.getHostAddress()) > -1;
     }
-    
+
     //TODO test createClientTransport with ttl
-    
+
     //TODO test sendResponse
-    
-    @Test (expectedExceptions = SocketException.class)
+
+    @Test(expectedExceptions = SocketException.class)
     public void checkServerConnection()
-        throws SocketException, UnknownHostException {
+            throws SocketException, UnknownHostException {
         DatagramSocket datagramSocket = new DatagramSocket();
         int localPort = datagramSocket.getLocalPort();
         datagramSocket.close();

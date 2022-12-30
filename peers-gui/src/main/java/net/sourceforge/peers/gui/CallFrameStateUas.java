@@ -27,7 +27,7 @@ import net.sourceforge.peers.Logger;
 
 public class CallFrameStateUas extends CallFrameState {
 
-    public CallFrameStateUas(String id, CallFrame callFrame, Logger logger) {
+    public CallFrameStateUas(String id, CallFrame callFrame, ) {
         super(id, callFrame, logger);
         callPanel = new JPanel();
         callPanel.add(new JLabel("Incoming call"));

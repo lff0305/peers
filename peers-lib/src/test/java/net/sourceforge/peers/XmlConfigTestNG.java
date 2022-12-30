@@ -19,6 +19,7 @@
 
 package net.sourceforge.peers;
 
+import java.lang.invoke.MethodHandles;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
@@ -26,15 +27,18 @@ import net.sourceforge.peers.media.MediaMode;
 import net.sourceforge.peers.sip.syntaxencoding.SipURI;
 import net.sourceforge.peers.sip.syntaxencoding.SipUriSyntaxException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.annotations.Test;
 
 public class XmlConfigTestNG {
 
+    private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+
     @Test
     public void testSave() throws SipUriSyntaxException, UnknownHostException {
         String fileName = getClass().getResource("configTest.xml").getFile();
-        Logger logger = new FileLogger(null);
-        Config config = new XmlConfig(fileName, logger);
+        Config config = new XmlConfig(fileName);
         InetAddress localHost = InetAddress.getLocalHost();
         String userPart = "alice";
         String domain = "sourceforge.net";
@@ -57,7 +61,7 @@ public class XmlConfigTestNG {
         config.setRtpPort(rtpPort);
         config.setAuthorizationUsername(authorizationUsername);
         config.save();
-        config = new XmlConfig(fileName, logger);
+        config = new XmlConfig(fileName);
         assert localHost.equals(config.getLocalInetAddress());
         assert userPart.equals(config.getUserPart());
         assert domain.equals(config.getDomain());

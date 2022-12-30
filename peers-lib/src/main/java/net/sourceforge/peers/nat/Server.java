@@ -22,6 +22,7 @@ package net.sourceforge.peers.nat;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.lang.invoke.MethodHandles;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.Socket;
@@ -34,22 +35,26 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
 public class Server {
 
+    private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+
     public static final String SERVER_HOST = "peers.sourceforge.net";
     public static final String PREFIX = "/peers";
     //public static final int SOCKET_TIMEOUT = 30000;//millis
-    
+
     //private InetAddress localAddress;
     //private int localPort;
     private InetAddress remoteAddress;
     private int remotePort;
-    
+
     private Socket socket;
-    
+
     //TODO constructor without parameters
     public Server(InetAddress localAddress, int localPort) throws IOException {
         super();
@@ -63,6 +68,7 @@ public class Server {
 
     /**
      * This method will update public address on the web server.
+     *
      * @param email user identifier
      */
     public void update(String email) {
@@ -79,7 +85,7 @@ public class Server {
         get(urlEnd.toString());
         close();
     }
-    
+
     public Document getPeers(String email) {
         String encodedEmail;
         try {
@@ -101,9 +107,9 @@ public class Server {
             e.printStackTrace();
             return null;
         }
-        System.out.println("retrieved peers");
+        logger.info("retrieved peers");
         DocumentBuilderFactory documentBuilderFactory
-            = DocumentBuilderFactory.newInstance();
+                = DocumentBuilderFactory.newInstance();
         DocumentBuilder documentBuilder;
         try {
             documentBuilder = documentBuilderFactory.newDocumentBuilder();
@@ -122,7 +128,7 @@ public class Server {
         }
         return null;
     }
-    
+
     private String get(String urlEnd) {
         StringBuffer get = new StringBuffer();
         get.append("GET ");
@@ -134,15 +140,15 @@ public class Server {
         get.append(SERVER_HOST);
         get.append("\r\n");
         get.append("\r\n");
-        
+
         try {
             socket.getOutputStream().write(get.toString().getBytes());
         } catch (IOException e) {
             e.printStackTrace();
             return null;
         }
-        System.out.println("> sent:\n" + get.toString());
-        
+        logger.info("> sent:\n" + get.toString());
+
         StringBuffer result = new StringBuffer();
         try {
             byte[] buf = new byte[256];
@@ -153,16 +159,16 @@ public class Server {
                 result.append(new String(exactBuf));
             }
         } catch (SocketTimeoutException e) {
-            System.out.println("socket timeout");
+            logger.info("socket timeout");
             return null;
         } catch (IOException e) {
             e.printStackTrace();
             return null;
         }
-        System.out.println("< received:\n" + result.toString());
+        logger.info("< received:\n" + result.toString());
         return result.toString();
     }
-    
+
     public void close() {
         if (socket != null) {
             try {

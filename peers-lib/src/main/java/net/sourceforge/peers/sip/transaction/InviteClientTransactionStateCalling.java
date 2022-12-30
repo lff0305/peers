@@ -19,14 +19,19 @@
 
 package net.sourceforge.peers.sip.transaction;
 
-import net.sourceforge.peers.Logger;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.lang.invoke.MethodHandles;
 
 public class InviteClientTransactionStateCalling extends InviteClientTransactionState {
 
+    private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+
     public InviteClientTransactionStateCalling(String id,
-            InviteClientTransaction inviteClientTransaction, Logger logger) {
-        super(id, inviteClientTransaction, logger);
+                                               InviteClientTransaction inviteClientTransaction) {
+        super(id, inviteClientTransaction);
     }
 
     @Override
@@ -35,24 +40,24 @@ public class InviteClientTransactionStateCalling extends InviteClientTransaction
         inviteClientTransaction.setState(nextState);
         inviteClientTransaction.sendRetrans();
     }
-    
+
     @Override
     public void timerBFires() {
         timerBFiresOrTransportError();
     }
-    
+
     @Override
     public void transportError() {
         timerBFiresOrTransportError();
     }
-    
+
     private void timerBFiresOrTransportError() {
         InviteClientTransactionState nextState = inviteClientTransaction.TERMINATED;
         inviteClientTransaction.setState(nextState);
         inviteClientTransaction.transactionUser.transactionTimeout(
                 inviteClientTransaction);
     }
-    
+
     @Override
     public void received2xx() {
         InviteClientTransactionState nextState = inviteClientTransaction.TERMINATED;
@@ -60,7 +65,7 @@ public class InviteClientTransactionStateCalling extends InviteClientTransaction
         inviteClientTransaction.transactionUser.successResponseReceived(
                 inviteClientTransaction.getLastResponse(), inviteClientTransaction);
     }
-    
+
     @Override
     public void received1xx() {
         InviteClientTransactionState nextState = inviteClientTransaction.PROCEEDING;
@@ -68,7 +73,7 @@ public class InviteClientTransactionStateCalling extends InviteClientTransaction
         inviteClientTransaction.transactionUser.provResponseReceived(
                 inviteClientTransaction.getLastResponse(), inviteClientTransaction);
     }
-    
+
     @Override
     public void received300To699() {
         InviteClientTransactionState nextState = inviteClientTransaction.COMPLETED;
@@ -77,6 +82,6 @@ public class InviteClientTransactionStateCalling extends InviteClientTransaction
         inviteClientTransaction.transactionUser.errResponseReceived(
                 inviteClientTransaction.getLastResponse());
     }
-    
-    
+
+
 }

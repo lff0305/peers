@@ -19,48 +19,50 @@
 
 package net.sourceforge.peers.media;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
+import java.lang.invoke.MethodHandles;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.concurrent.CountDownLatch;
 
-import net.sourceforge.peers.Logger;
-
 
 public abstract class Encoder implements Runnable {
-    
+
+    private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+
     private PipedInputStream rawData;
     private PipedOutputStream encodedData;
     private boolean isStopped;
     private FileOutputStream encoderOutput;
     private FileOutputStream encoderInput;
     private boolean mediaDebug;
-    private Logger logger;
     private String peersHome;
     private CountDownLatch latch;
 
     public Encoder(PipedInputStream rawData, PipedOutputStream encodedData,
-            boolean mediaDebug, Logger logger, String peersHome,
-            CountDownLatch latch) {
+                   boolean mediaDebug, String peersHome,
+                   CountDownLatch latch) {
         this.rawData = rawData;
         this.encodedData = encodedData;
         this.mediaDebug = mediaDebug;
-        this.logger = logger;
         this.peersHome = peersHome;
         this.latch = latch;
         isStopped = false;
     }
-    
+
     public void run() {
         byte[] buffer;
         if (mediaDebug) {
             SimpleDateFormat simpleDateFormat =
-                new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
+                    new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
             String date = simpleDateFormat.format(new Date());
             String dir = peersHome + File.separator
                     + AbstractSoundManager.MEDIA_DIR + File.separator;
@@ -102,7 +104,7 @@ public abstract class Encoder implements Runnable {
                 logger.error("input/output error", e);
                 return;
             }
-            
+
             byte[] ulawData = process(buffer);
             if (mediaDebug) {
                 try {

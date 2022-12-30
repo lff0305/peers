@@ -31,7 +31,7 @@ public class NameAddress {
         }
         return nameAddress.substring(leftPos + 1, rightPos);
     }
-    
+
     protected String addrSpec;
     protected String displayName;
 
@@ -45,7 +45,7 @@ public class NameAddress {
         this.addrSpec = addrSpec;
         this.displayName = displayName;
     }
-    
+
     @Override
     public String toString() {
         StringBuffer buf = new StringBuffer();
@@ -62,5 +62,5 @@ public class NameAddress {
     public String getAddrSpec() {
         return addrSpec;
     }
-    
+
 }

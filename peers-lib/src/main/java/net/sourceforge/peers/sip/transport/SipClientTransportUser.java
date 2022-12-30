@@ -23,5 +23,6 @@ package net.sourceforge.peers.sip.transport;
 public interface SipClientTransportUser {
 
     public void requestTransportError(SipRequest sipRequest, Exception e);
+
     public void responseTransportError(Exception e);
 }

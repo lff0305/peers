@@ -60,7 +60,7 @@ public class JsUserAgent extends Applet implements SipListener, WebLoggerOutput 
 
     public void instantiatePeers(String ipAddress) {
         try {
-            System.out.println("instantiatePeers");
+            logger.info("instantiatePeers");
             executorService = Executors.newCachedThreadPool();
             logger = new WebLogger(this);
             config = new JavaConfig();
@@ -72,7 +72,7 @@ public class JsUserAgent extends Applet implements SipListener, WebLoggerOutput 
             try {
                 inetAddress = InetAddress.getByName(ipAddress);
             } catch (UnknownHostException e1) {
-                System.out.println(e1 + " " + e1.getMessage());
+                logger.info(e1 + " " + e1.getMessage());
                 logger.error("Unknown ipAddress " + ipAddress, e1);
                 return;
             }
@@ -86,14 +86,14 @@ public class JsUserAgent extends Applet implements SipListener, WebLoggerOutput 
                     try {
                         userAgent = new UserAgent(JsUserAgent.this, config,
                                 logger, soundManager);
-                        System.out.println("useragent created");
+                        logger.info("useragent created");
                     } catch (SocketException e) {
                         logger.error(e.getMessage());
-                        System.out.println(e);
+                        logger.info(e);
                     }
                 }
             });
-            System.out.println("task scheduled");
+            logger.info("task scheduled");
         } catch (SecurityException e) {
             logger.error(e.getMessage());
             e.printStackTrace();

@@ -19,15 +19,20 @@
 
 package net.sourceforge.peers.sip.transaction;
 
-import net.sourceforge.peers.Logger;
 import net.sourceforge.peers.sip.RFC3261;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.lang.invoke.MethodHandles;
 
 public class InviteServerTransactionStateProceeding extends
         InviteServerTransactionState {
 
+    private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+
     public InviteServerTransactionStateProceeding(String id,
-            InviteServerTransaction inviteServerTransaction, Logger logger) {
-        super(id, inviteServerTransaction, logger);
+                                                  InviteServerTransaction inviteServerTransaction) {
+        super(id, inviteServerTransaction);
     }
 
     @Override
@@ -37,20 +42,20 @@ public class InviteServerTransactionStateProceeding extends
         //TODO inviteServerTransaction.sendProvisionalResponse();
         inviteServerTransaction.sendLastResponse();
     }
-    
+
     @Override
     public void transportError() {
         InviteServerTransactionState nextState = inviteServerTransaction.TERMINATED;
         inviteServerTransaction.setState(nextState);
     }
-    
+
     @Override
     public void received2xx() {
         InviteServerTransactionState nextState = inviteServerTransaction.TERMINATED;
         inviteServerTransaction.setState(nextState);
         inviteServerTransaction.sendLastResponse();
     }
-    
+
     @Override
     public void received300To699() {
         InviteServerTransactionState nextState = inviteServerTransaction.COMPLETED;
@@ -63,12 +68,12 @@ public class InviteServerTransactionStateProceeding extends
         inviteServerTransaction.timer.schedule(
                 inviteServerTransaction.new TimerH(), 64 * RFC3261.TIMER_T1);
     }
-    
+
     @Override
     public void receivedInvite() {
         InviteServerTransactionState nextState = inviteServerTransaction.PROCEEDING;
         inviteServerTransaction.setState(nextState);
     }
-    
-    
+
+
 }

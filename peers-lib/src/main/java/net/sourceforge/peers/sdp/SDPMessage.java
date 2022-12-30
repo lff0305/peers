@@ -21,5 +21,5 @@ package net.sourceforge.peers.sdp;
 
 public class SDPMessage {
 
-    
+
 }

@@ -29,7 +29,7 @@ public class Client {
     private Server server;
     //private String email;
     private PeerManager peerManager;
-    
+
     public Client(String email, String localInetAddress, int localPort) {
         //this.email = email;
         // TODO automatic global access interface discovery
@@ -46,19 +46,19 @@ public class Client {
         peerManager.setDocument(document);
         peerManager.start();
     }
-    
+
     /**
      * @param args
      */
     public static void main(String[] args) {
         if (args.length != 3) {
             System.err.println("usage: java ... <email> <localAddress>" +
-            		" <localPort>");
+                    " <localPort>");
             System.exit(1);
         }
-        
+
         new Client(args[0], args[1], Integer.parseInt(args[2]));
-        
+
     }
 
 }

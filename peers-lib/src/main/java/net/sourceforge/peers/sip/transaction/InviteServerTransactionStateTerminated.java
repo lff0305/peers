@@ -19,14 +19,19 @@
 
 package net.sourceforge.peers.sip.transaction;
 
-import net.sourceforge.peers.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.lang.invoke.MethodHandles;
 
 public class InviteServerTransactionStateTerminated extends
         InviteServerTransactionState {
 
+    private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+
     public InviteServerTransactionStateTerminated(String id,
-            InviteServerTransaction inviteServerTransaction, Logger logger) {
-        super(id, inviteServerTransaction, logger);
+                                                  InviteServerTransaction inviteServerTransaction) {
+        super(id, inviteServerTransaction);
     }
 
 }

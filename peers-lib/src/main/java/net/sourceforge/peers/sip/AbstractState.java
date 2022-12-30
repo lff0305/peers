@@ -19,16 +19,18 @@
 
 package net.sourceforge.peers.sip;
 
-import net.sourceforge.peers.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.lang.invoke.MethodHandles;
 
 public abstract class AbstractState {
-    
+
+    private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
     protected String id;
-    protected Logger logger;
-    
-    public AbstractState(String id, Logger logger) {
+
+    public AbstractState(String id) {
         this.id = id;
-        this.logger = logger;
     }
 
     public void log(AbstractState state) {
@@ -39,5 +41,5 @@ public abstract class AbstractState {
         buf.append(new Exception().getStackTrace()[1].getMethodName());
         logger.debug(buf.toString());
     }
-    
+
 }

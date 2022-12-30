@@ -20,7 +20,7 @@ public class CustomConfig implements Config {
             //inetAddress = InetAddress.getLocalHost();
             // if you have several network interfaces like I do,
             // select the right one after running ipconfig or ifconfig
-            inetAddress = InetAddress.getByName("192.168.1.10");
+            inetAddress = InetAddress.getByName("10.12.10.19");
         } catch (UnknownHostException e) {
             e.printStackTrace();
             return null;
@@ -30,11 +30,15 @@ public class CustomConfig implements Config {
 
     @Override
     public InetAddress getPublicInetAddress() { return publicIpAddress; }
-    @Override public String getUserPart() { return "alice"; }
-    @Override public String getDomain() { return "atlanta.com"; }
-    @Override public String getPassword() { return "secret1234"; }
+    @Override public String getUserPart() { return "+6599991234"; }
+    @Override public String getDomain() { return "34.199.3.47"; }
+    @Override public String getPassword() { return "Telepathy@2020"; }
+
+//    @Override public String getUserPart() { return "tester"; }
+//    @Override public String getDomain() { return "10.12.10.192"; }
+//    @Override public String getPassword() { return "Telepathy2020"; }
     @Override
-    public MediaMode getMediaMode() { return MediaMode.captureAndPlayback; }
+    public MediaMode getMediaMode() { return MediaMode.file; }
 
     @Override public String getAuthorizationUsername() { return getUserPart(); }
 
@@ -46,7 +50,9 @@ public class CustomConfig implements Config {
     @Override public SipURI getOutboundProxy() { return null; }
     @Override public int getSipPort() { return 0; }
     @Override public boolean isMediaDebug() { return false; }
-    @Override public String getMediaFile() { return null; }
+    @Override public String getMediaFile() {
+        return "media.raw";
+    }
     @Override public int getRtpPort() { return 0; }
     @Override public void setLocalInetAddress(InetAddress inetAddress) { }
     @Override public void setUserPart(String userPart) { }

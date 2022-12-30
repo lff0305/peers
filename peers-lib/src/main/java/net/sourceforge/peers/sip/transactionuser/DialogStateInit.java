@@ -19,12 +19,17 @@
 
 package net.sourceforge.peers.sip.transactionuser;
 
-import net.sourceforge.peers.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.lang.invoke.MethodHandles;
 
 public class DialogStateInit extends DialogState {
-    
-    public DialogStateInit(String id, Dialog dialog, Logger logger) {
-        super(id, dialog, logger);
+
+    private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+
+    public DialogStateInit(String id, Dialog dialog) {
+        super(id, dialog);
     }
 
     @Override
@@ -32,19 +37,19 @@ public class DialogStateInit extends DialogState {
         DialogState nextState = dialog.EARLY;
         dialog.setState(nextState);
     }
-    
+
     @Override
     public void receivedOrSent2xx() {
         DialogState nextState = dialog.CONFIRMED;
         dialog.setState(nextState);
     }
-    
+
     @Override
     public void receivedOrSent300To699() {
         DialogState nextState = dialog.TERMINATED;
         dialog.setState(nextState);
     }
-    
+
     @Override
     public void receivedOrSentBye() {
         logger.error(id + " invalid transition");

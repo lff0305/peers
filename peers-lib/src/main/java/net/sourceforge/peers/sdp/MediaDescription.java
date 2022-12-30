@@ -80,7 +80,7 @@ public class MediaDescription {
         buf.append(RFC4566.TYPE_MEDIA).append(RFC4566.SEPARATOR);
         buf.append(type).append(" ").append(port);
         buf.append(" RTP/AVP");
-        for (Codec codec: codecs) {
+        for (Codec codec : codecs) {
             buf.append(" ");
             buf.append(codec.getPayloadType());
         }
@@ -98,11 +98,11 @@ public class MediaDescription {
             buf.append("IN IP").append(ipVersion).append(" ");
             buf.append(ipAddress.getHostAddress()).append("\r\n");
         }
-        for (Codec codec: codecs) {
+        for (Codec codec : codecs) {
             buf.append(codec.toString());
         }
         if (attributes != null) {
-            for (String attributeName: attributes.keySet()) {
+            for (String attributeName : attributes.keySet()) {
                 buf.append(RFC4566.TYPE_ATTRIBUTE).append(RFC4566.SEPARATOR);
                 buf.append(attributeName);
                 String attributeValue = attributes.get(attributeName);

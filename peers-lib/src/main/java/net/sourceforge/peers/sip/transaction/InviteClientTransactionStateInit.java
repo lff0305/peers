@@ -19,13 +19,18 @@
 
 package net.sourceforge.peers.sip.transaction;
 
-import net.sourceforge.peers.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.lang.invoke.MethodHandles;
 
 public class InviteClientTransactionStateInit extends InviteClientTransactionState {
 
+    private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+
     public InviteClientTransactionStateInit(String id,
-            InviteClientTransaction inviteClientTransaction, Logger logger) {
-        super(id, inviteClientTransaction, logger);
+                                            InviteClientTransaction inviteClientTransaction) {
+        super(id, inviteClientTransaction);
     }
 
     @Override
@@ -33,5 +38,5 @@ public class InviteClientTransactionStateInit extends InviteClientTransactionSta
         InviteClientTransactionState nextState = inviteClientTransaction.CALLING;
         inviteClientTransaction.setState(nextState);
     }
-    
+
 }

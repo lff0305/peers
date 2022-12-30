@@ -53,7 +53,7 @@ public class AboutFrame extends JFrame implements ActionListener,
 
     private Logger logger;
 
-    public AboutFrame(String peersHome, Logger logger) {
+    public AboutFrame(String peersHome, ) {
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("About");
 

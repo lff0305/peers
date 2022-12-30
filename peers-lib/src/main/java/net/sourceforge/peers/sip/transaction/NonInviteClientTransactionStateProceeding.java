@@ -19,17 +19,21 @@
 
 package net.sourceforge.peers.sip.transaction;
 
-import net.sourceforge.peers.Logger;
 import net.sourceforge.peers.sip.RFC3261;
 import net.sourceforge.peers.sip.transport.SipResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.lang.invoke.MethodHandles;
 
 public class NonInviteClientTransactionStateProceeding extends
         NonInviteClientTransactionState {
 
+    private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+
     public NonInviteClientTransactionStateProceeding(String id,
-            NonInviteClientTransaction nonInviteClientTransaction,
-            Logger logger) {
-        super(id, nonInviteClientTransaction, logger);
+                                                     NonInviteClientTransaction nonInviteClientTransaction) {
+        super(id, nonInviteClientTransaction);
     }
 
     @Override
@@ -39,30 +43,30 @@ public class NonInviteClientTransactionStateProceeding extends
         ++nonInviteClientTransaction.nbRetrans;
         nonInviteClientTransaction.sendRetrans(RFC3261.TIMER_T2);
     }
-    
+
     @Override
     public void timerFFires() {
         timerFFiresOrTransportError();
     }
-    
+
     @Override
     public void transportError() {
         timerFFiresOrTransportError();
     }
-    
+
     private void timerFFiresOrTransportError() {
         NonInviteClientTransactionState nextState = nonInviteClientTransaction.TERMINATED;
         nonInviteClientTransaction.setState(nextState);
         nonInviteClientTransaction.transactionUser.transactionTimeout(
                 nonInviteClientTransaction);
     }
-    
+
     @Override
     public void received1xx() {
         NonInviteClientTransactionState nextState = nonInviteClientTransaction.PROCEEDING;
         nonInviteClientTransaction.setState(nextState);
     }
-    
+
     @Override
     public void received200To699() {
         NonInviteClientTransactionState nextState = nonInviteClientTransaction.COMPLETED;
@@ -77,5 +81,5 @@ public class NonInviteClientTransactionStateProceeding extends
                     response);
         }
     }
-    
+
 }

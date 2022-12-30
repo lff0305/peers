@@ -19,10 +19,16 @@
 
 package net.sourceforge.peers.sip.transport;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.lang.invoke.MethodHandles;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 public class Debugger {
+
+    private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
     public static void showObject(Object o) {
         Method[] methods = o.getClass().getMethods();
@@ -48,7 +54,7 @@ public class Debugger {
                 buf.append("\n");
             }
         }
-        System.out.println(buf);
+        logger.info("Buf = {}", buf);
     }
-    
+
 }

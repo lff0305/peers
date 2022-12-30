@@ -19,56 +19,41 @@
 
 package net.sourceforge.peers.media;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
 import java.io.PipedOutputStream;
+import java.lang.invoke.MethodHandles;
 import java.util.concurrent.CountDownLatch;
-
-import net.sourceforge.peers.Logger;
 
 
 public class Capture implements Runnable {
-    
+
+    private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+
     public static final int SAMPLE_SIZE = 16;
     public static final int BUFFER_SIZE = SAMPLE_SIZE * 20;
-    
+
     private PipedOutputStream rawData;
     private boolean isStopped;
     private SoundSource soundSource;
-    private Logger logger;
     private CountDownLatch latch;
-    
-    public Capture(PipedOutputStream rawData, SoundSource soundSource,
-            Logger logger, CountDownLatch latch) {
+
+    public Capture(PipedOutputStream rawData, SoundSource soundSource, CountDownLatch latch) {
         this.rawData = rawData;
         this.soundSource = soundSource;
-        this.logger = logger;
         this.latch = latch;
         isStopped = false;
     }
 
     public void run() {
         byte[] buffer;
-        
-        while (!isStopped) {
-            buffer = soundSource.readData();
-            try {
-                if (buffer == null) {
-                    break;
-                }
-                rawData.write(buffer);
-                rawData.flush();
-            } catch (IOException e) {
-                logger.error("input/output error", e);
-                return;
-            }
-        }
-        latch.countDown();
-        if (latch.getCount() != 0) {
-            try {
-                latch.await();
-            } catch (InterruptedException e) {
-                logger.error("interrupt exception", e);
-            }
+
+        try {
+            Thread.sleep(1000000000);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
         }
     }
 

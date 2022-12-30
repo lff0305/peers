@@ -20,22 +20,25 @@
 package net.sourceforge.peers.nat;
 
 import java.io.IOException;
+import java.lang.invoke.MethodHandles;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 public class PeerManager extends Thread {
-
+    private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
     private InetAddress localAddress;
     private int localPort;
     private Document document;
-    
+
     public PeerManager(InetAddress localAddress, int localPort) {
         this.localAddress = localAddress;
         this.localPort = localPort;
@@ -72,7 +75,7 @@ public class PeerManager extends Thread {
             }
         }
     }
-    
+
     private void createConnection(Node peer, DatagramSocket datagramSocket) {
         NodeList childNodes = peer.getChildNodes();
         String ipAddress = null;
@@ -97,9 +100,9 @@ public class PeerManager extends Thread {
                 String message = "hello world " + System.currentTimeMillis();
                 byte[] buf = message.getBytes();
                 DatagramPacket datagramPacket =
-                    new DatagramPacket(buf, buf.length, remoteAddress, remotePort);
+                        new DatagramPacket(buf, buf.length, remoteAddress, remotePort);
                 datagramSocket.send(datagramPacket);
-                System.out.println("> sent:\n" + message);
+                logger.info("> sent:\n" + message);
                 try {
                     Thread.sleep(5000);
                 } catch (InterruptedException e) {

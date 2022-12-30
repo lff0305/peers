@@ -19,25 +19,37 @@
 
 package net.sourceforge.peers.sip.transaction;
 
-import net.sourceforge.peers.Logger;
 import net.sourceforge.peers.sip.AbstractState;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.lang.invoke.MethodHandles;
 
 //17.2.2
 public abstract class NonInviteServerTransactionState extends AbstractState {
+    private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
     protected NonInviteServerTransaction nonInviteServerTransaction;
-    
+
     public NonInviteServerTransactionState(String id,
-            NonInviteServerTransaction nonInviteServerTransaction,
-            Logger logger) {
-        super(id, logger);
+                                           NonInviteServerTransaction nonInviteServerTransaction) {
+        super(id);
         this.nonInviteServerTransaction = nonInviteServerTransaction;
     }
 
-    public void received200To699() {}
-    public void received1xx() {}
-    public void receivedRequest() {}
-    public void transportError() {}
-    public void timerJFires() {}
+    public void received200To699() {
+    }
+
+    public void received1xx() {
+    }
+
+    public void receivedRequest() {
+    }
+
+    public void transportError() {
+    }
+
+    public void timerJFires() {
+    }
 }
 

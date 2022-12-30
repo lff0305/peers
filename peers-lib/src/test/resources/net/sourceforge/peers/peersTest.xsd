@@ -23,43 +23,42 @@
            elementFormDefault="qualified">
 
 
+    <!-- Simple Types -->
 
-  <!-- Simple Types -->
 
+    <xs:simpleType name="portType">
+        <xs:restriction base="xs:integer">
+            <xs:minInclusive value="0"/>
+            <xs:maxInclusive value="65535"/>
+        </xs:restriction>
+    </xs:simpleType>
 
-  <xs:simpleType name="portType">
-    <xs:restriction base="xs:integer">
-      <xs:minInclusive value="0"/>
-      <xs:maxInclusive value="65535"/>
-    </xs:restriction>
-  </xs:simpleType>
+    <xs:simpleType name="mediaModeType">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="none"/>
+            <xs:enumeration value="captureAndPlayback"/>
+            <xs:enumeration value="echo"/>
+        </xs:restriction>
+    </xs:simpleType>
 
-  <xs:simpleType name="mediaModeType">
-    <xs:restriction base="xs:string">
-      <xs:enumeration value="none"/>
-      <xs:enumeration value="captureAndPlayback"/>
-      <xs:enumeration value="echo"/>
-    </xs:restriction>
-  </xs:simpleType>
+    <!-- Complex Types -->
 
-  <!-- Complex Types -->
+    <xs:complexType name="peersType">
+        <xs:sequence>
+            <xs:element name="ipAddress" type="xs:string"/>
+            <xs:element name="userPart" type="xs:string"/>
+            <xs:element name="domain" type="xs:string"/>
+            <xs:element name="password" type="xs:string"/>
+            <xs:element name="outboundProxy" type="xs:string"/>
+            <xs:element name="sipPort" type="portType"/>
+            <xs:element name="rtpPort" type="portType"/>
+            <xs:element name="mediaMode" type="mediaModeType"/>
+            <xs:element name="mediaDebug" type="xs:boolean"/>
+        </xs:sequence>
+    </xs:complexType>
 
-  <xs:complexType name="peersType">
-    <xs:sequence>
-      <xs:element name="ipAddress" type="xs:string"/>
-      <xs:element name="userPart" type="xs:string"/>
-      <xs:element name="domain" type="xs:string"/>
-      <xs:element name="password" type="xs:string"/>
-      <xs:element name="outboundProxy" type="xs:string"/>
-      <xs:element name="sipPort" type="portType"/>
-      <xs:element name="rtpPort" type="portType"/>
-      <xs:element name="mediaMode" type="mediaModeType"/>
-      <xs:element name="mediaDebug" type="xs:boolean"/>
-    </xs:sequence>
-  </xs:complexType>
+    <!-- Root Element -->
 
-  <!-- Root Element -->
-
-  <xs:element name="peers" type="peersType"/>
+    <xs:element name="peers" type="peersType"/>
 
 </xs:schema>

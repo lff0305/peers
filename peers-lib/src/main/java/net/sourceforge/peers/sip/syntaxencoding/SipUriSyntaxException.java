@@ -39,5 +39,5 @@ public class SipUriSyntaxException extends Exception {
         super(cause);
     }
 
-    
+
 }

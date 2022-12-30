@@ -19,30 +19,33 @@
 
 package net.sourceforge.peers.sip.transaction;
 
-import net.sourceforge.peers.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.lang.invoke.MethodHandles;
 
 public class NonInviteServerTransactionStateTrying extends
         NonInviteServerTransactionState {
+    private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
     public NonInviteServerTransactionStateTrying(String id,
-            NonInviteServerTransaction nonInviteServerTransaction,
-            Logger logger) {
-        super(id, nonInviteServerTransaction, logger);
+                                                 NonInviteServerTransaction nonInviteServerTransaction) {
+        super(id, nonInviteServerTransaction);
     }
 
     @Override
     public void received1xx() {
         NonInviteServerTransactionState nextState =
-            nonInviteServerTransaction.PROCEEDING;
+                nonInviteServerTransaction.PROCEEDING;
         nonInviteServerTransaction.setState(nextState);
         nonInviteServerTransaction.sendLastResponse();
     }
-    
+
     @Override
     public void received200To699() {
         NonInviteServerTransactionState nextState =
-            nonInviteServerTransaction.COMPLETED;
+                nonInviteServerTransaction.COMPLETED;
         nonInviteServerTransaction.setState(nextState);
     }
-    
+
 }

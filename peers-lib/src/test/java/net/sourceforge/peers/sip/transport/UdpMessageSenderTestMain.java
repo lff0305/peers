@@ -21,26 +21,30 @@ package net.sourceforge.peers.sip.transport;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.lang.invoke.MethodHandles;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
 import net.sourceforge.peers.Config;
-import net.sourceforge.peers.FileLogger;
 import net.sourceforge.peers.JavaConfig;
 import net.sourceforge.peers.sip.syntaxencoding.SipParser;
 import net.sourceforge.peers.sip.syntaxencoding.SipParserException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 public class UdpMessageSenderTestMain implements Runnable {
 
+    private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+
     public void run() {
-        SipRequest sipRequest = (SipRequest)parse(
+        SipRequest sipRequest = (SipRequest) parse(
                 "INVITE sip:UAB@example.com SIP/2.0\r\n"
-                + "Via: ;branchId=3456UGD\r\n"
-                + "Subject: I know you're there,\r\n"
-                + "         pick up the phone\r\n"
-                + "         and talk to me!\r\n"
-                + "\r\n");
+                        + "Via: ;branchId=3456UGD\r\n"
+                        + "Subject: I know you're there,\r\n"
+                        + "         pick up the phone\r\n"
+                        + "         and talk to me!\r\n"
+                        + "\r\n");
         InetAddress inetAddress;
         try {
             inetAddress = InetAddress.getByName("192.168.2.1");
@@ -57,7 +61,7 @@ public class UdpMessageSenderTestMain implements Runnable {
         }
         config.setLocalInetAddress(localhost);
         TransportManager transportManager = new TransportManager(
-                null, config, new FileLogger(null));
+                null, config);
         try {
             MessageSender messageSender = transportManager
                     .createClientTransport(sipRequest, inetAddress, 5060, "UDP");
@@ -67,7 +71,7 @@ public class UdpMessageSenderTestMain implements Runnable {
             return;
         }
     }
-    
+
     public static void main(String[] args) {
         for (int i = 0; i < 5; ++i) {
             new Thread(new UdpMessageSenderTestMain()).start();

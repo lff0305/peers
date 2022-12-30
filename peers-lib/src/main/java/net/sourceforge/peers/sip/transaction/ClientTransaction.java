@@ -24,6 +24,8 @@ import net.sourceforge.peers.sip.transport.SipResponse;
 public interface ClientTransaction {
 
     public void receivedResponse(SipResponse sipResponse);
+
     public void start();
+
     public String getContact();
 }

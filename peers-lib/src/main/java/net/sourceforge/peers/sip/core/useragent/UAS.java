@@ -39,7 +39,7 @@ import net.sourceforge.peers.sip.transport.TransportManager;
 public class UAS implements SipServerTransportUser {
 
     public final static ArrayList<String> SUPPORTED_METHODS;
-    
+
     static {
         SUPPORTED_METHODS = new ArrayList<String>();
         SUPPORTED_METHODS.add(RFC3261.METHOD_INVITE);
@@ -47,22 +47,24 @@ public class UAS implements SipServerTransportUser {
         SUPPORTED_METHODS.add(RFC3261.METHOD_CANCEL);
         SUPPORTED_METHODS.add(RFC3261.METHOD_OPTIONS);
         SUPPORTED_METHODS.add(RFC3261.METHOD_BYE);
-    };
-    
+    }
+
+    ;
+
     private InitialRequestManager initialRequestManager;
     private MidDialogRequestManager midDialogRequestManager;
-    
+
     private DialogManager dialogManager;
-    
+
     /**
      * should be instanciated only once, it was a singleton.
      */
     public UAS(UserAgent userAgent,
-            InitialRequestManager initialRequestManager,
-            MidDialogRequestManager midDialogRequestManager,
-            DialogManager dialogManager,
-            TransactionManager transactionManager,
-            TransportManager transportManager) throws SocketException {
+               InitialRequestManager initialRequestManager,
+               MidDialogRequestManager midDialogRequestManager,
+               DialogManager dialogManager,
+               TransactionManager transactionManager,
+               TransportManager transportManager) throws SocketException {
         this.initialRequestManager = initialRequestManager;
         this.midDialogRequestManager = midDialogRequestManager;
         this.dialogManager = dialogManager;
@@ -70,7 +72,7 @@ public class UAS implements SipServerTransportUser {
         transportManager.createServerTransport(
                 RFC3261.TRANSPORT_UDP, userAgent.getConfig().getSipPort());
     }
-    
+
     public void messageReceived(SipMessage sipMessage) {
         if (sipMessage instanceof SipRequest) {
             requestReceived((SipRequest) sipMessage);
@@ -82,19 +84,19 @@ public class UAS implements SipServerTransportUser {
     }
 
     private void responseReceived(SipResponse sipResponse) {
-        
+
     }
-    
+
     private void requestReceived(SipRequest sipRequest) {
         //TODO 8.2
-        
+
         //TODO JTA to make request processing atomic
-        
+
         SipHeaders headers = sipRequest.getSipHeaders();
-        
+
         //TODO find whether the request is within an existing dialog or not
         SipHeaderFieldValue to =
-            headers.get(new SipHeaderFieldName(RFC3261.HDR_TO));
+                headers.get(new SipHeaderFieldName(RFC3261.HDR_TO));
         String toTag = to.getParam(new SipHeaderParamName(RFC3261.PARAM_TAG));
         if (toTag != null) {
             Dialog dialog = dialogManager.getDialog(sipRequest);
@@ -104,12 +106,12 @@ public class UAS implements SipServerTransportUser {
                 //TODO continue processing
             } else {
                 //TODO reject the request with a 481 Call/Transaction Does Not Exist
-                
+
             }
         } else {
-            
+
             initialRequestManager.manageInitialRequest(sipRequest);
-            
+
         }
     }
 
@@ -129,5 +131,5 @@ public class UAS implements SipServerTransportUser {
     public MidDialogRequestManager getMidDialogRequestManager() {
         return midDialogRequestManager;
     }
-    
+
 }

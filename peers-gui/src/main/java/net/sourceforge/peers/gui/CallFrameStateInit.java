@@ -25,7 +25,7 @@ import net.sourceforge.peers.Logger;
 
 public class CallFrameStateInit extends CallFrameState {
 
-    public CallFrameStateInit(String id, CallFrame callFrame, Logger logger) {
+    public CallFrameStateInit(String id, CallFrame callFrame, ) {
         super(id, callFrame, logger);
     }
 

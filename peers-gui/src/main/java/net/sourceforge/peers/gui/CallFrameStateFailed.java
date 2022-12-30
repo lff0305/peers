@@ -27,7 +27,7 @@ import net.sourceforge.peers.Logger;
 
 public class CallFrameStateFailed extends CallFrameState {
 
-    public CallFrameStateFailed(String id, CallFrame callFrame, Logger logger) {
+    public CallFrameStateFailed(String id, CallFrame callFrame, ) {
         super(id, callFrame, logger);
         callPanel = new JPanel();
         callPanel.add(new JLabel("Failed"));

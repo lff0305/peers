@@ -28,7 +28,7 @@ import net.sourceforge.peers.sip.transport.SipResponse;
 
 public class CallFrameStateUac extends CallFrameState {
 
-    public CallFrameStateUac(String id, CallFrame callFrame, Logger logger) {
+    public CallFrameStateUac(String id, CallFrame callFrame, ) {
         super(id, callFrame, logger);
         callPanel = new JPanel();
         callPanel.add(new JLabel("Calling"));

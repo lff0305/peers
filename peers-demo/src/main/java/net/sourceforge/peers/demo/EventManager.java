@@ -1,28 +1,28 @@
 package net.sourceforge.peers.demo;
 
+import java.lang.invoke.MethodHandles;
 import java.net.SocketException;
 
 import net.sourceforge.peers.Config;
-import net.sourceforge.peers.FileLogger;
-import net.sourceforge.peers.Logger;
 import net.sourceforge.peers.javaxsound.JavaxSoundManager;
 import net.sourceforge.peers.sip.core.useragent.SipListener;
 import net.sourceforge.peers.sip.core.useragent.UserAgent;
 import net.sourceforge.peers.sip.syntaxencoding.SipUriSyntaxException;
 import net.sourceforge.peers.sip.transport.SipRequest;
 import net.sourceforge.peers.sip.transport.SipResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class EventManager implements SipListener {
-
+    private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
     private UserAgent userAgent;
     private SipRequest sipRequest;
     private CommandsReader commandsReader;
     
     public EventManager() throws SocketException {
         Config config = new CustomConfig();
-        Logger logger = new FileLogger(null);
-        JavaxSoundManager javaxSoundManager = new JavaxSoundManager(false, logger, null);
-        userAgent = new UserAgent(this, config, logger, javaxSoundManager);
+        JavaxSoundManager javaxSoundManager = new JavaxSoundManager(false, null);
+        userAgent = new UserAgent(this, config, javaxSoundManager);
         new Thread() {
             public void run() {
                 try {
@@ -63,35 +63,59 @@ public class EventManager implements SipListener {
     
     // SipListener methods
     
-    @Override
-    public void registering(SipRequest sipRequest) { }
+    public void registering(SipRequest sipRequest) {
+        logger.info("Registering {}", sipRequest);
+    }
 
-    @Override
-    public void registerSuccessful(SipResponse sipResponse) { }
+    public void registerSuccessful(SipResponse sipResponse) {
+        logger.info("RegisterSuccessful {}", sipResponse);
+    }
 
-    @Override
-    public void registerFailed(SipResponse sipResponse) { }
+    public void registerFailed(SipResponse sipResponse) {
+        logger.info("Register Failed {}", sipResponse);
+    }
 
-    @Override
-    public void incomingCall(SipRequest sipRequest, SipResponse provResponse) { }
+    public void incomingCall(SipRequest sipRequest, SipResponse provResponse) {
+        logger.info("incomingCall ");
+    }
 
-    @Override
-    public void remoteHangup(SipRequest sipRequest) { }
+    public void remoteHangup(SipRequest sipRequest) {
+        logger.info("remoteHangup");
+    }
 
-    @Override
-    public void ringing(SipResponse sipResponse) { }
+    public void ringing(SipResponse sipResponse) {
+        logger.info("ringing");
+    }
 
-    @Override
-    public void calleePickup(SipResponse sipResponse) { }
+    public void calleePickup(SipResponse sipResponse) {
+        logger.info("calleePickup");
+    }
 
-    @Override
-    public void error(SipResponse sipResponse) { }
+    public void error(SipResponse sipResponse) {
+        logger.info("error {}", sipResponse);
+    }
 
     public static void main(String[] args) {
         try {
             new EventManager();
         } catch (SocketException e) {
             e.printStackTrace();
+        }
+    }
+
+    public void dtmf() {
+        try {
+            String digits = "9999";
+            userAgent.getMediaManager().sendDtmf('9');
+            Thread.sleep(100);
+            userAgent.getMediaManager().sendDtmf('9');
+            Thread.sleep(100);
+            userAgent.getMediaManager().sendDtmf('9');
+            Thread.sleep(100);
+            userAgent.getMediaManager().sendDtmf('9');
+            logger.info(digits);
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
         }
     }
 }

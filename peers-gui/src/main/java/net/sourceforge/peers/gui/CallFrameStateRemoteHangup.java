@@ -28,7 +28,7 @@ import net.sourceforge.peers.Logger;
 public class CallFrameStateRemoteHangup extends CallFrameState {
 
     public CallFrameStateRemoteHangup(String id, CallFrame callFrame,
-            Logger logger) {
+            ) {
         super(id, callFrame, logger);
         callPanel = new JPanel();
         callPanel.add(new JLabel("Remote hangup"));

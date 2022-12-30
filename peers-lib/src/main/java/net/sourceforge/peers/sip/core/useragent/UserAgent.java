@@ -20,13 +20,12 @@
 package net.sourceforge.peers.sip.core.useragent;
 
 import java.io.File;
+import java.lang.invoke.MethodHandles;
 import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.List;
 
 import net.sourceforge.peers.Config;
-import net.sourceforge.peers.FileLogger;
-import net.sourceforge.peers.Logger;
 import net.sourceforge.peers.XmlConfig;
 import net.sourceforge.peers.media.AbstractSoundManager;
 import net.sourceforge.peers.media.Echo;
@@ -49,71 +48,66 @@ import net.sourceforge.peers.sip.transport.SipMessage;
 import net.sourceforge.peers.sip.transport.SipRequest;
 import net.sourceforge.peers.sip.transport.SipResponse;
 import net.sourceforge.peers.sip.transport.TransportManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 public class UserAgent {
 
+    private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
     public final static String CONFIG_FILE = "conf" + File.separator + "peers.xml";
     public final static int RTP_DEFAULT_PORT = 8000;
 
     private String peersHome;
-    private Logger logger;
     private Config config;
 
     private List<String> peers;
     //private List<Dialog> dialogs;
-    
+
     //TODO factorize echo and captureRtpSender
     private Echo echo;
-    
+
     private UAC uac;
     private UAS uas;
 
     private ChallengeManager challengeManager;
-    
+
     private DialogManager dialogManager;
     private TransactionManager transactionManager;
     private TransportManager transportManager;
 
     private int cseqCounter;
     private SipListener sipListener;
-    
+
     private SDPManager sdpManager;
     private AbstractSoundManager soundManager;
     private MediaManager mediaManager;
 
-    public UserAgent(SipListener sipListener, String peersHome,
-            Logger logger, AbstractSoundManager soundManager)
-                    throws SocketException {
-        this(sipListener, null, peersHome, logger, soundManager);
+    public UserAgent(SipListener sipListener, String peersHome, AbstractSoundManager soundManager)
+            throws SocketException {
+        this(sipListener, null, peersHome, soundManager);
     }
 
-    public UserAgent(SipListener sipListener, Config config,
-            Logger logger, AbstractSoundManager soundManager)
-                    throws SocketException {
-        this(sipListener, config, null, logger, soundManager);
+    public UserAgent(SipListener sipListener, Config config, AbstractSoundManager soundManager)
+            throws SocketException {
+        this(sipListener, config, null, soundManager);
     }
 
-    private UserAgent(SipListener sipListener, Config config, String peersHome,
-            Logger logger, AbstractSoundManager soundManager)
-                    throws SocketException {
+    private UserAgent(SipListener sipListener, Config config, String peersHome, AbstractSoundManager soundManager)
+            throws SocketException {
         this.sipListener = sipListener;
         if (peersHome == null) {
             peersHome = Utils.DEFAULT_PEERS_HOME;
         }
         this.peersHome = peersHome;
-        if (logger == null) {
-            logger = new FileLogger(this.peersHome);
-        }
-        this.logger = logger;
         if (config == null) {
             config = new XmlConfig(this.peersHome + File.separator
-                    + CONFIG_FILE, this.logger);
+                    + CONFIG_FILE);
         }
         this.config = config;
 
         cseqCounter = 1;
-        
+
         StringBuffer buf = new StringBuffer();
         buf.append("starting user agent [");
         buf.append("myAddress: ");
@@ -127,71 +121,64 @@ public class UserAgent {
         logger.info(buf.toString());
 
         //transaction user
-        
-        dialogManager = new DialogManager(logger);
-        
+
+        dialogManager = new DialogManager();
+
         //transaction
-        
-        transactionManager = new TransactionManager(logger);
-        
+
+        transactionManager = new TransactionManager();
+
         //transport
-        
+
         transportManager = new TransportManager(transactionManager,
-                config, logger);
-        
+                config);
+
         transactionManager.setTransportManager(transportManager);
-        
+
         //core
-        
+
         InviteHandler inviteHandler = new InviteHandler(this,
                 dialogManager,
                 transactionManager,
-                transportManager,
-                logger);
+                transportManager);
         CancelHandler cancelHandler = new CancelHandler(this,
                 dialogManager,
                 transactionManager,
-                transportManager,
-                logger);
+                transportManager);
         ByeHandler byeHandler = new ByeHandler(this,
                 dialogManager,
                 transactionManager,
-                transportManager,
-                logger);
+                transportManager);
         OptionsHandler optionsHandler = new OptionsHandler(this,
                 transactionManager,
-                transportManager,
-                logger);
+                transportManager);
         RegisterHandler registerHandler = new RegisterHandler(this,
                 transactionManager,
-                transportManager,
-                logger);
-        
+                transportManager);
+
         InitialRequestManager initialRequestManager =
-            new InitialRequestManager(
-                this,
-                inviteHandler,
-                cancelHandler,
-                byeHandler,
-                optionsHandler,
-                registerHandler,
-                dialogManager,
-                transactionManager,
-                transportManager,
-                logger);
+                new InitialRequestManager(
+                        this,
+                        inviteHandler,
+                        cancelHandler,
+                        byeHandler,
+                        optionsHandler,
+                        registerHandler,
+                        dialogManager,
+                        transactionManager,
+                        transportManager);
         MidDialogRequestManager midDialogRequestManager =
-            new MidDialogRequestManager(
-                this,
-                inviteHandler,
-                cancelHandler,
-                byeHandler,
-                optionsHandler,
-                registerHandler,
-                dialogManager,
-                transactionManager,
-                transportManager,
-                logger);
-        
+                new MidDialogRequestManager(
+                        this,
+                        inviteHandler,
+                        cancelHandler,
+                        byeHandler,
+                        optionsHandler,
+                        registerHandler,
+                        dialogManager,
+                        transactionManager,
+                        transportManager);
+
         uas = new UAS(this,
                 initialRequestManager,
                 midDialogRequestManager,
@@ -204,14 +191,12 @@ public class UserAgent {
                 midDialogRequestManager,
                 dialogManager,
                 transactionManager,
-                transportManager,
-                logger);
+                transportManager);
 
         challengeManager = new ChallengeManager(config,
                 initialRequestManager,
                 midDialogRequestManager,
-                dialogManager,
-                logger);
+                dialogManager);
         registerHandler.setChallengeManager(challengeManager);
         inviteHandler.setChallengeManager(challengeManager);
         byeHandler.setChallengeManager(challengeManager);
@@ -219,22 +204,22 @@ public class UserAgent {
         peers = new ArrayList<String>();
         //dialogs = new ArrayList<Dialog>();
 
-        sdpManager = new SDPManager(this, logger);
+        sdpManager = new SDPManager(this);
         inviteHandler.setSdpManager(sdpManager);
         optionsHandler.setSdpManager(sdpManager);
         // soundManager  = new SoundManager(config.isMediaDebug(), logger,
         // this.peersHome);
         this.soundManager = soundManager;
-        mediaManager = new MediaManager(this, logger);
+        mediaManager = new MediaManager(this);
     }
-    
+
     // client methods
 
     public void close() {
         transportManager.closeTransports();
         config.setPublicInetAddress(null);
     }
-    
+
     public SipRequest register() throws SipUriSyntaxException {
         return uac.register();
     }
@@ -242,29 +227,30 @@ public class UserAgent {
     public void unregister() throws SipUriSyntaxException {
         uac.unregister();
     }
-    
+
     public SipRequest invite(String requestUri, String callId)
             throws SipUriSyntaxException {
         return uac.invite(requestUri, callId);
     }
-    
+
     public void terminate(SipRequest sipRequest) {
         uac.terminate(sipRequest);
     }
-    
+
     public void acceptCall(SipRequest sipRequest, Dialog dialog) {
         uas.acceptCall(sipRequest, dialog);
     }
-    
+
     public void rejectCall(SipRequest sipRequest) {
         uas.rejectCall(sipRequest);
     }
-    
-    
+
+
     /**
-     * Gives the sipMessage if sipMessage is a SipRequest or 
+     * Gives the sipMessage if sipMessage is a SipRequest or
      * the SipRequest corresponding to the SipResponse
      * if sipMessage is a SipResponse
+     *
      * @param sipMessage
      * @return null if sipMessage is neither a SipRequest neither a SipResponse
      */
@@ -273,11 +259,11 @@ public class UserAgent {
             return (SipRequest) sipMessage;
         } else if (sipMessage instanceof SipResponse) {
             SipResponse sipResponse = (SipResponse) sipMessage;
-            Transaction transaction = (Transaction)transactionManager
-                .getClientTransaction(sipResponse);
+            Transaction transaction = (Transaction) transactionManager
+                    .getClientTransaction(sipResponse);
             if (transaction == null) {
-                transaction = (Transaction)transactionManager
-                    .getServerTransaction(sipResponse);
+                transaction = (Transaction) transactionManager
+                        .getServerTransaction(sipResponse);
             }
             if (transaction == null) {
                 return null;
@@ -287,7 +273,7 @@ public class UserAgent {
             return null;
         }
     }
-    
+
 //    public List<Dialog> getDialogs() {
 //        return dialogs;
 //    }
@@ -315,10 +301,10 @@ public class UserAgent {
         buf.append(method);
         return buf.toString();
     }
-    
+
     public boolean isRegistered() {
         return uac.getInitialRequestManager().getRegisterHandler()
-            .isRegistered();
+                .isRegistered();
     }
 
     public UAS getUas() {
@@ -332,7 +318,7 @@ public class UserAgent {
     public DialogManager getDialogManager() {
         return dialogManager;
     }
-    
+
     public int getSipPort() {
         return transportManager.getSipPort();
     }

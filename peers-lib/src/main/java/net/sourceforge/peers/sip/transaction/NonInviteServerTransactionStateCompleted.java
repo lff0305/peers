@@ -19,15 +19,19 @@
 
 package net.sourceforge.peers.sip.transaction;
 
-import net.sourceforge.peers.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.lang.invoke.MethodHandles;
 
 public class NonInviteServerTransactionStateCompleted extends
         NonInviteServerTransactionState {
 
+    private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+
     public NonInviteServerTransactionStateCompleted(String id,
-            NonInviteServerTransaction nonInviteServerTransaction,
-            Logger logger) {
-        super(id, nonInviteServerTransaction, logger);
+                                                    NonInviteServerTransaction nonInviteServerTransaction) {
+        super(id, nonInviteServerTransaction);
     }
 
     @Override
@@ -35,18 +39,18 @@ public class NonInviteServerTransactionStateCompleted extends
         NonInviteServerTransactionState nextState = nonInviteServerTransaction.TERMINATED;
         nonInviteServerTransaction.setState(nextState);
     }
-    
+
     @Override
     public void transportError() {
         NonInviteServerTransactionState nextState = nonInviteServerTransaction.TERMINATED;
         nonInviteServerTransaction.setState(nextState);
     }
-    
+
     @Override
     public void receivedRequest() {
         NonInviteServerTransactionState nextState = nonInviteServerTransaction.COMPLETED;
         nonInviteServerTransaction.setState(nextState);
         nonInviteServerTransaction.sendLastResponse();
     }
-    
+
 }

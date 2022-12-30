@@ -22,6 +22,7 @@ package net.sourceforge.peers;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.lang.invoke.MethodHandles;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
@@ -40,6 +41,8 @@ import net.sourceforge.peers.sip.RFC3261;
 import net.sourceforge.peers.sip.syntaxencoding.SipURI;
 import net.sourceforge.peers.sip.syntaxencoding.SipUriSyntaxException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -49,9 +52,9 @@ import org.xml.sax.SAXException;
 
 public class XmlConfig implements Config {
 
-    public final static int RTP_DEFAULT_PORT = 8000;
+    private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
-    private Logger logger;
+    public final static int RTP_DEFAULT_PORT = 8000;
 
     private File file;
     private Document document;
@@ -69,9 +72,9 @@ public class XmlConfig implements Config {
     private String mediaFile;
     private int rtpPort;
     private String authorizationUsername;
-    
+
     // corresponding DOM nodes
-    
+
     private Node ipAddressNode;
     private Node userPartNode;
     private Node domainNode;
@@ -89,15 +92,14 @@ public class XmlConfig implements Config {
     private InetAddress publicInetAddress;
 
     //private InetAddress
-    public XmlConfig(String fileName, Logger logger) {
+    public XmlConfig(String fileName) {
         file = new File(fileName);
-        this.logger = logger;
         if (!file.exists()) {
             logger.debug("config file " + fileName + " not found");
             return;
         }
         DocumentBuilderFactory documentBuilderFactory =
-            DocumentBuilderFactory.newInstance();
+                DocumentBuilderFactory.newInstance();
         DocumentBuilder documentBuilder;
         try {
             documentBuilder = documentBuilderFactory.newDocumentBuilder();
@@ -108,7 +110,7 @@ public class XmlConfig implements Config {
         try {
             document = documentBuilder.parse(file);
         } catch (SAXException e) {
-            logger.error("cannot parse " + fileName,e );
+            logger.error("cannot parse " + fileName, e);
             return;
         } catch (IOException e) {
             logger.error("IOException", e);
@@ -133,7 +135,7 @@ public class XmlConfig implements Config {
             userPart = userPartNode.getTextContent();
         }
         authUserNode = getFirstChild(documentElement, "authorizationUsername");
-        if (! isNullOrEmpty(authUserNode)) {
+        if (!isNullOrEmpty(authUserNode)) {
             authorizationUsername = authUserNode.getTextContent();
         }
         domainNode = getFirstChild(documentElement, "domain");
@@ -332,7 +334,7 @@ public class XmlConfig implements Config {
         } else {
             outboundProxyNode.setTextContent(outboundProxy.toString());
         }
-        
+
     }
 
     @Override

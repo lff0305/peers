@@ -19,42 +19,44 @@
 
 package net.sourceforge.peers.sip.transaction;
 
+import java.lang.invoke.MethodHandles;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Timer;
 
-import net.sourceforge.peers.Logger;
 import net.sourceforge.peers.sip.transport.SipRequest;
 import net.sourceforge.peers.sip.transport.SipResponse;
 import net.sourceforge.peers.sip.transport.TransportManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 public abstract class Transaction {
 
+    private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+
     public static final char ID_SEPARATOR = '|';
-    
+
     protected String branchId;
     protected String method;
-    
+
     protected SipRequest request;
     protected List<SipResponse> responses;
-    
+
     protected Timer timer;
     protected TransportManager transportManager;
     protected TransactionManager transactionManager;
 
-    protected Logger logger;
 
     protected Transaction(String branchId, String method, Timer timer,
-            TransportManager transportManager,
-            TransactionManager transactionManager, Logger logger) {
+                          TransportManager transportManager,
+                          TransactionManager transactionManager) {
         this.branchId = branchId;
         this.method = method;
         this.timer = timer;
         this.transportManager = transportManager;
         this.transactionManager = transactionManager;
-        this.logger = logger;
         responses = Collections.synchronizedList(new ArrayList<SipResponse>());
     }
 
@@ -75,5 +77,5 @@ public abstract class Transaction {
     public SipRequest getRequest() {
         return request;
     }
-    
+
 }

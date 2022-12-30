@@ -24,6 +24,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PipedInputStream;
+import java.lang.invoke.MethodHandles;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -32,12 +33,15 @@ import java.util.List;
 import java.util.Random;
 import java.util.concurrent.CountDownLatch;
 
-import net.sourceforge.peers.Logger;
 import net.sourceforge.peers.rtp.RtpPacket;
 import net.sourceforge.peers.rtp.RtpSession;
 import net.sourceforge.peers.sdp.Codec;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class RtpSender implements Runnable {
+
+    private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
     private PipedInputStream encodedData;
     private RtpSession rtpSession;
@@ -46,33 +50,30 @@ public class RtpSender implements Runnable {
     private boolean mediaDebug;
     private Codec codec;
     private List<RtpPacket> pushedPackets;
-    private Logger logger;
     private String peersHome;
     private CountDownLatch latch;
-    
+
     public RtpSender(PipedInputStream encodedData, RtpSession rtpSession,
-            boolean mediaDebug, Codec codec, Logger logger, String peersHome,
-            CountDownLatch latch) {
+                     boolean mediaDebug, Codec codec, String peersHome,
+                     CountDownLatch latch) {
         this.encodedData = encodedData;
         this.rtpSession = rtpSession;
         this.mediaDebug = mediaDebug;
         this.codec = codec;
         this.peersHome = peersHome;
         this.latch = latch;
-        this.logger = logger;
         isStopped = false;
-        pushedPackets = Collections.synchronizedList(
-                new ArrayList<RtpPacket>());
+        pushedPackets = Collections.synchronizedList(new ArrayList<RtpPacket>());
     }
 
     public void run() {
         if (mediaDebug) {
             SimpleDateFormat simpleDateFormat =
-                new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
+                    new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
             String date = simpleDateFormat.format(new Date());
             String fileName = peersHome + File.separator
-                + AbstractSoundManager.MEDIA_DIR + File.separator + date
-                + "_rtp_sender.input";
+                    + AbstractSoundManager.MEDIA_DIR + File.separator + date
+                    + "_rtp_sender.input";
             try {
                 rtpSenderInput = new FileOutputStream(fileName);
             } catch (FileNotFoundException e) {
@@ -101,34 +102,16 @@ public class RtpSender implements Runnable {
         long lastSentTime = System.nanoTime();
         // indicate if its the first time that we send a packet (dont wait)
         boolean firstTime = true;
-        
+
         while (!isStopped) {
             numBytesRead = 0;
-            try {
-                while (!isStopped && numBytesRead < buf_size) {
-                    // expect that the buffer is full
-                    tempBytesRead = encodedData.read(buffer, numBytesRead,
-                            buf_size - numBytesRead);
-                    numBytesRead += tempBytesRead;
-                }
-            } catch (IOException e) {
-                logger.error("input/output error", e);
-                return;
-            }
+            boolean send = false;
             byte[] trimmedBuffer;
             if (numBytesRead < buffer.length) {
                 trimmedBuffer = new byte[numBytesRead];
                 System.arraycopy(buffer, 0, trimmedBuffer, 0, numBytesRead);
             } else {
                 trimmedBuffer = buffer;
-            }
-            if (mediaDebug) {
-                try {
-                    rtpSenderInput.write(trimmedBuffer); // TODO use classpath
-                } catch (IOException e) {
-                    logger.error("cannot write to file", e);
-                    break;
-                }
             }
             if (pushedPackets.size() > 0) {
                 RtpPacket pushedPacket = pushedPackets.remove(0);
@@ -137,6 +120,8 @@ public class RtpSender implements Runnable {
                 rtpPacket.setIncrementTimeStamp(pushedPacket.isIncrementTimeStamp());
                 byte[] data = pushedPacket.getData();
                 rtpPacket.setData(data);
+                send = true;
+                logger.info("Send {} bytes", data.length);
             } else {
                 if (rtpPacket.getPayloadType() != codec.getPayloadType()) {
                     rtpPacket.setPayloadType(codec.getPayloadType());
@@ -144,11 +129,11 @@ public class RtpSender implements Runnable {
                 }
                 rtpPacket.setData(trimmedBuffer);
             }
-            
+
             rtpPacket.setSequenceNumber(sequenceNumber++);
             if (rtpPacket.isIncrementTimeStamp()) {
-                    timestamp += buf_size;
-                }
+                timestamp += buf_size;
+            }
             rtpPacket.setTimestamp(timestamp);
             if (firstTime) {
                 rtpSession.send(rtpPacket);
@@ -174,21 +159,10 @@ public class RtpSender implements Runnable {
                     offset = sleepTime + 20000000;
                 }
             }
-        }
-        if (mediaDebug) {
             try {
-                rtpSenderInput.close();
-            } catch (IOException e) {
-                logger.error("cannot close file", e);
-                return;
-            }
-        }
-        latch.countDown();
-        if (latch.getCount() != 0) {
-            try {
-                latch.await();
+                Thread.sleep(10);
             } catch (InterruptedException e) {
-                logger.error("interrupt exception", e);
+                return;
             }
         }
     }

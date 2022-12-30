@@ -19,7 +19,6 @@
 
 package net.sourceforge.peers.sip.core.useragent.handlers;
 
-import net.sourceforge.peers.Logger;
 import net.sourceforge.peers.sip.RFC3261;
 import net.sourceforge.peers.sip.core.useragent.RequestManager;
 import net.sourceforge.peers.sip.core.useragent.SipListener;
@@ -36,39 +35,40 @@ import net.sourceforge.peers.sip.transactionuser.DialogManager;
 import net.sourceforge.peers.sip.transport.SipRequest;
 import net.sourceforge.peers.sip.transport.SipResponse;
 import net.sourceforge.peers.sip.transport.TransportManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.lang.invoke.MethodHandles;
 
 public class ByeHandler extends DialogMethodHandler
         implements ServerTransactionUser, ClientTransactionUser {
 
+    private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+
     public ByeHandler(UserAgent userAgent, DialogManager dialogManager,
-            TransactionManager transactionManager,
-            TransportManager transportManager, Logger logger) {
-        super(userAgent, dialogManager, transactionManager, transportManager,
-                logger);
+                      TransactionManager transactionManager,
+                      TransportManager transportManager) {
+        super(userAgent, dialogManager, transactionManager, transportManager);
     }
 
     ////////////////////////////////////////////////
     // methods for UAC
     ////////////////////////////////////////////////
-    
+
     public void preprocessBye(SipRequest sipRequest, Dialog dialog) {
 
         // 15.1.1
-        
+
         String addrSpec = sipRequest.getRequestUri().toString();
         userAgent.getPeers().remove(addrSpec);
         challengeManager.postProcess(sipRequest);
     }
-    
-    
 
-    
-    
-    
+
     ////////////////////////////////////////////////
     // methods for UAS
     ////////////////////////////////////////////////
-    
+
     public void handleBye(SipRequest sipRequest, Dialog dialog) {
         dialog.receivedOrSentBye();
         //String remoteUri = dialog.getRemoteUri();
@@ -78,31 +78,31 @@ public class ByeHandler extends DialogMethodHandler
         dialogManager.removeDialog(dialog.getId());
         logger.debug("removed dialog " + dialog.getId());
         userAgent.getMediaManager().stopSession();
-        
+
         SipResponse sipResponse =
-            RequestManager.generateResponse(
-                    sipRequest,
-                    dialog,
-                    RFC3261.CODE_200_OK,
-                    RFC3261.REASON_200_OK);
-        
+                RequestManager.generateResponse(
+                        sipRequest,
+                        dialog,
+                        RFC3261.CODE_200_OK,
+                        RFC3261.REASON_200_OK);
+
         // TODO determine port and transport for server transaction>transport
         // from initial invite
         // FIXME determine port and transport for server transaction>transport
         ServerTransaction serverTransaction = transactionManager
-            .createServerTransaction(
-                    sipResponse,
-                    userAgent.getSipPort(),
-                    RFC3261.TRANSPORT_UDP,
-                    this,
-                    sipRequest);
-        
+                .createServerTransaction(
+                        sipResponse,
+                        userAgent.getSipPort(),
+                        RFC3261.TRANSPORT_UDP,
+                        this,
+                        sipRequest);
+
         serverTransaction.start();
-        
+
         serverTransaction.receivedRequest(sipRequest);
-        
+
         serverTransaction.sendReponse(sipResponse);
-        
+
         dialogManager.removeDialog(dialog.getId());
 
         SipListener sipListener = userAgent.getSipListener();
@@ -119,65 +119,63 @@ public class ByeHandler extends DialogMethodHandler
     ///////////////////////////////////////
     public void transactionFailure() {
         // TODO Auto-generated method stub
-        
+
     }
 
     ///////////////////////////////////////
     //ClientTransactionUser methods
     ///////////////////////////////////////
-	@Override
-	public void transactionTimeout(ClientTransaction clientTransaction) {
-		// TODO Auto-generated method stub
-		
-	}
+    @Override
+    public void transactionTimeout(ClientTransaction clientTransaction) {
+        // TODO Auto-generated method stub
 
-	@Override
-	public void provResponseReceived(SipResponse sipResponse,
-			Transaction transaction) {
-		// TODO Auto-generated method stub
-		
-	}
+    }
 
-	@Override
-	public void errResponseReceived(SipResponse sipResponse) {
-		int statusCode = sipResponse.getStatusCode();
+    @Override
+    public void provResponseReceived(SipResponse sipResponse,
+                                     Transaction transaction) {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public void errResponseReceived(SipResponse sipResponse) {
+        int statusCode = sipResponse.getStatusCode();
         if (statusCode == RFC3261.CODE_401_UNAUTHORIZED
                 || statusCode == RFC3261.CODE_407_PROXY_AUTHENTICATION_REQUIRED
                 && !challenged) {
-        	NonInviteClientTransaction nonInviteClientTransaction =
-                (NonInviteClientTransaction)
-                transactionManager.getClientTransaction(sipResponse);
+            NonInviteClientTransaction nonInviteClientTransaction =
+                    (NonInviteClientTransaction)
+                            transactionManager.getClientTransaction(sipResponse);
             SipRequest sipRequest = nonInviteClientTransaction.getRequest();
             String password = userAgent.getConfig().getPassword();
             if (password != null && !"".equals(password.trim())) {
                 challengeManager.handleChallenge(sipRequest,
                         sipResponse);
             }
-        	challenged = true;
+            challenged = true;
         } else {
-        	challenged = false;
+            challenged = false;
         }
-	}
+    }
 
-	@Override
-	public void successResponseReceived(SipResponse sipResponse,
-			Transaction transaction) {
-		Dialog dialog = dialogManager.getDialog(sipResponse);
-		if (dialog == null) {
-		    return;
-		}
-		dialog.receivedOrSentBye();
-		dialogManager.removeDialog(dialog.getId());
+    @Override
+    public void successResponseReceived(SipResponse sipResponse,
+                                        Transaction transaction) {
+        Dialog dialog = dialogManager.getDialog(sipResponse);
+        if (dialog == null) {
+            return;
+        }
+        dialog.receivedOrSentBye();
+        dialogManager.removeDialog(dialog.getId());
         logger.debug("removed dialog " + dialog.getId());
-	}
+    }
 
-	@Override
-	public void transactionTransportError() {
-		// TODO Auto-generated method stub
-		
-	}
+    @Override
+    public void transactionTransportError() {
+        // TODO Auto-generated method stub
+
+    }
 
 
-    
-    
 }

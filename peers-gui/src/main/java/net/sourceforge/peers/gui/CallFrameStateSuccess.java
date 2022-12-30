@@ -27,7 +27,7 @@ import net.sourceforge.peers.Logger;
 
 public class CallFrameStateSuccess extends CallFrameState {
 
-    public CallFrameStateSuccess(String id, CallFrame callFrame, Logger logger) {
+    public CallFrameStateSuccess(String id, CallFrame callFrame, ) {
         super(id, callFrame, logger);
         callPanel = new JPanel();
         callPanel.add(new JLabel("Talking"));

@@ -26,20 +26,20 @@ import org.testng.annotations.Test;
 public class SipURITestNG {
 
     //SUCCESS TESTS
-    
+
     @Test
     public void testSipUri1() throws SipUriSyntaxException {
         SipURI sipUri = new SipURI("sip:alice@atlanta.com");
         assert "alice".equals(sipUri.getUserinfo());
         assert "atlanta.com".equals(sipUri.getHost());
     }
-    
+
     @Test
     public void testSipUri2() throws SipUriSyntaxException {
         SipURI sipUri = new SipURI("sip:atlanta.com");
         assert "atlanta.com".equals(sipUri.getHost());
     }
-    
+
     @Test
     public void testSipUri3() throws SipUriSyntaxException {
         SipURI sipUri = new SipURI("sip:atlanta.com;a");
@@ -50,7 +50,7 @@ public class SipURITestNG {
         assert params.containsKey("a");
         assert "".equals(params.get("a"));
     }
-    
+
     @Test
     public void testSipUri4() throws SipUriSyntaxException {
         SipURI sipUri = new SipURI("sip:alice@atlanta.com;a;br=3");
@@ -64,7 +64,7 @@ public class SipURITestNG {
         assert "".equals(params.get("a"));
         assert "3".equals(params.get("br"));
     }
-    
+
     @Test
     public void testSipUri5() throws SipUriSyntaxException {
         SipURI sipUri = new SipURI("sip:alice@atlanta.com;br=3;a");
@@ -78,14 +78,14 @@ public class SipURITestNG {
         assert "".equals(params.get("a"));
         assert "3".equals(params.get("br"));
     }
-    
+
     @Test
     public void testSipUri6() throws SipUriSyntaxException {
         SipURI sipUri = new SipURI("sip:atlanta.com:5060");
         assert "atlanta.com".equals(sipUri.getHost());
         assert 5060 == sipUri.getPort();
     }
-    
+
     @Test
     public void testSipUri7() throws SipUriSyntaxException {
         SipURI sipUri = new SipURI("sip:alice@atlanta.com:5060;transport=TCP;rport;otherParam=2");
@@ -102,9 +102,9 @@ public class SipURITestNG {
         assert "".equals(params.get("rport"));
         assert "2".equals(params.get("otherParam"));
     }
-    
+
     //FAILURE TESTS
-    @Test (expectedExceptions = SipUriSyntaxException.class)
+    @Test(expectedExceptions = SipUriSyntaxException.class)
     public void shouldThrowIfBadSyntax() throws SipUriSyntaxException {
         new SipURI("mlsdj");
     }

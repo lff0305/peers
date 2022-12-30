@@ -32,18 +32,18 @@ public class SdpParserTestNG {
     public void testParse() throws IOException {
         SdpParser sdpParser = new SdpParser();
         String body = "v=0\n"
-            + "o=jdoe 2890844526 2890842807 IN IP4 10.47.16.5\n"
-            + "s=SDP Seminar\n"
-            + "i=A Seminar on the session description protocol\n"
-            + "u=http://www.example.com/seminars/sdp.pdf\n"
-            + "e=j.doe@example.com (Jane Doe)\n"
-            //+ "c=IN IP4 224.2.17.12/127\r"
-            + "c=IN IP4 224.2.17.12\r"
-            + "t=2873397496 2873404696\r\n"
-            + "a=recvonly\n"
-            + "m=audio 49170 RTP/AVP 0\n"
-            + "m=video 51372 RTP/AVP 99\r\n"
-            + "a=rtpmap:99 h263-1998/90000\r";
+                + "o=jdoe 2890844526 2890842807 IN IP4 10.47.16.5\n"
+                + "s=SDP Seminar\n"
+                + "i=A Seminar on the session description protocol\n"
+                + "u=http://www.example.com/seminars/sdp.pdf\n"
+                + "e=j.doe@example.com (Jane Doe)\n"
+                //+ "c=IN IP4 224.2.17.12/127\r"
+                + "c=IN IP4 224.2.17.12\r"
+                + "t=2873397496 2873404696\r\n"
+                + "a=recvonly\n"
+                + "m=audio 49170 RTP/AVP 0\n"
+                + "m=video 51372 RTP/AVP 99\r\n"
+                + "a=rtpmap:99 h263-1998/90000\r";
         SessionDescription sessionDescription;
         sessionDescription = sdpParser.parse(body.getBytes());
         assert sessionDescription != null;
@@ -51,28 +51,28 @@ public class SdpParserTestNG {
         assert 2890844526L == sessionDescription.getId();
         assert 2890842807L == sessionDescription.getVersion();
         assert InetAddress.getByName("224.2.17.12").equals(
-                    sessionDescription.getIpAddress());
+                sessionDescription.getIpAddress());
         assert "SDP Seminar".equals(sessionDescription.getName());
-        
+
         Hashtable<String, String> sessionAttributes =
-            sessionDescription.getAttributes();
+                sessionDescription.getAttributes();
         assert sessionAttributes != null;
         assert 1 == sessionAttributes.size();
         assert "".equals(sessionAttributes.get("recvonly"));
-        
+
         List<MediaDescription> mediaDescriptions =
-            sessionDescription.getMediaDescriptions();
+                sessionDescription.getMediaDescriptions();
         assert mediaDescriptions != null;
         assert mediaDescriptions.size() == 2;
-        
+
         MediaDescription audioMedia = mediaDescriptions.get(0);
         assert InetAddress.getByName("224.2.17.12").equals(
-                    audioMedia.getIpAddress());
+                audioMedia.getIpAddress());
         assert 49170 == audioMedia.getPort();
-        
+
         MediaDescription videoMedia = mediaDescriptions.get(1);
         assert InetAddress.getByName("224.2.17.12").equals(
-                    videoMedia.getIpAddress());
+                videoMedia.getIpAddress());
         assert 51372 == videoMedia.getPort();
         Hashtable<String, String> videoAttributes = videoMedia.getAttributes();
         assert videoAttributes != null;

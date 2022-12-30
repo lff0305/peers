@@ -23,6 +23,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.lang.invoke.MethodHandles;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.text.SimpleDateFormat;
@@ -35,11 +36,14 @@ import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.SourceDataLine;
 import javax.sound.sampled.TargetDataLine;
 
-import net.sourceforge.peers.Logger;
 import net.sourceforge.peers.media.AbstractSoundManager;
 import net.sourceforge.peers.sip.Utils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class JavaxSoundManager extends AbstractSoundManager {
+
+    private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
     private AudioFormat audioFormat;
     private TargetDataLine targetDataLine;
@@ -50,12 +54,10 @@ public class JavaxSoundManager extends AbstractSoundManager {
     private FileOutputStream microphoneOutput;
     private FileOutputStream speakerInput;
     private boolean mediaDebug;
-    private Logger logger;
     private String peersHome;
     
-    public JavaxSoundManager(boolean mediaDebug, Logger logger, String peersHome) {
+    public JavaxSoundManager(boolean mediaDebug, String peersHome) {
         this.mediaDebug = mediaDebug;
-        this.logger = logger;
         this.peersHome = peersHome;
         if (peersHome == null) {
             this.peersHome = Utils.DEFAULT_PEERS_HOME;

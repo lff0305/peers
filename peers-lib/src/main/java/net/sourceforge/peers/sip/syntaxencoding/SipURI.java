@@ -24,11 +24,10 @@ import java.util.Hashtable;
 import net.sourceforge.peers.sip.RFC3261;
 
 
-
 public class SipURI {
 
     public final static int DEFAULT_PORT = -1;
-    
+
     private String stringRepresentation;
     /**
      * telephone-subscriber and optional port are not managed
@@ -111,7 +110,7 @@ public class SipURI {
             buf.delete(0, nextSemicolon);
         }
     }
-    
+
     @Override
     public String toString() {
         return stringRepresentation;
@@ -132,5 +131,5 @@ public class SipURI {
     public String getUserinfo() {
         return userinfo;
     }
-    
+
 }

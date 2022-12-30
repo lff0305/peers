@@ -20,6 +20,7 @@
 package net.sourceforge.peers.sip.transport;
 
 import java.io.IOException;
+import java.lang.invoke.MethodHandles;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
@@ -28,19 +29,21 @@ import java.security.AccessController;
 import java.security.PrivilegedAction;
 
 import net.sourceforge.peers.Config;
-import net.sourceforge.peers.Logger;
 import net.sourceforge.peers.sip.RFC3261;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 public class UdpMessageSender extends MessageSender {
 
+    private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+
     private DatagramSocket datagramSocket;
-    
+
     public UdpMessageSender(InetAddress inetAddress, int port,
-            DatagramSocket datagramSocket, Config config,
-            Logger logger) throws SocketException {
+                            DatagramSocket datagramSocket, Config config) throws SocketException {
         super(datagramSocket.getLocalPort(), inetAddress, port,
-                config, RFC3261.TRANSPORT_UDP, logger);
+                config, RFC3261.TRANSPORT_UDP);
         this.datagramSocket = datagramSocket;
     }
 
@@ -55,7 +58,7 @@ public class UdpMessageSender extends MessageSender {
         StringBuffer direction = new StringBuffer();
         direction.append("SENT to ").append(inetAddress.getHostAddress());
         direction.append("/").append(port);
-        logger.traceNetwork(new String(buf), direction.toString());
+        logger.trace(new String(buf), direction.toString());
     }
 
     @Override
@@ -66,21 +69,12 @@ public class UdpMessageSender extends MessageSender {
         logger.debug("UdpMessageSender.sendBytes " + bytes.length
                 + " " + inetAddress + ":" + port);
         // AccessController.doPrivileged added for plugin compatibility
-        AccessController.doPrivileged(
-            new PrivilegedAction<Void>() {
-
-                @Override
-                public Void run() {
-                    try {
-                        logger.debug(datagramSocket.getLocalAddress().toString());
-                        datagramSocket.send(packet);
-                    } catch (Throwable t) {
-                        logger.error("throwable", new Exception(t));
-                    }
-                    return null;
-                }
-            }
-        );
+        try {
+            logger.debug(datagramSocket.getLocalAddress().toString());
+            datagramSocket.send(packet);
+        } catch (Throwable t) {
+            logger.error("throwable", new Exception(t));
+        }
 
         logger.debug("UdpMessageSender.sendBytes packet sent");
     }

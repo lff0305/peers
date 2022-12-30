@@ -40,13 +40,13 @@ public class WebLogger implements Logger {
 
     @Override
     public synchronized void debug(String message) {
-        System.out.println(genericLog(message.toString(), "DEBUG"));
+        logger.info(genericLog(message.toString(), "DEBUG"));
         out.javaLog(genericLog(message.toString(), "DEBUG"));
     }
 
     @Override
     public synchronized void info(String message) {
-        System.out.println(genericLog(message.toString(), "INFO"));
+        logger.info(genericLog(message.toString(), "INFO"));
         out.javaLog(genericLog(message.toString(), "INFO"));
     }
 
@@ -79,7 +79,7 @@ public class WebLogger implements Logger {
         buf.append("]\n\n");
         buf.append(message);
         buf.append("\n");
-        System.out.println(buf.toString());
+        logger.info(buf.toString());
         out.javaNetworkLog(buf.toString());
     }
 

@@ -18,11 +18,13 @@
 */
 package net.sourceforge.peers.media;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-
-import net.sourceforge.peers.Logger;
+import java.lang.invoke.MethodHandles;
 
 // To create an audio file for peers, you can use audacity:
 //
@@ -46,13 +48,13 @@ import net.sourceforge.peers.Logger;
 
 public class FileReader implements SoundSource {
 
+    private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+
     public final static int BUFFER_SIZE = 256;
 
     private FileInputStream fileInputStream;
-    private Logger logger;
 
-    public FileReader(String fileName, Logger logger) {
-        this.logger = logger;
+    public FileReader(String fileName) {
         try {
             fileInputStream = new FileInputStream(fileName);
         } catch (FileNotFoundException e) {

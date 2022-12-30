@@ -19,7 +19,6 @@
 
 package net.sourceforge.peers.sip.core.useragent;
 
-import net.sourceforge.peers.Logger;
 import net.sourceforge.peers.sip.RFC3261;
 import net.sourceforge.peers.sip.core.useragent.handlers.ByeHandler;
 import net.sourceforge.peers.sip.core.useragent.handlers.CancelHandler;
@@ -39,12 +38,17 @@ import net.sourceforge.peers.sip.transactionuser.DialogManager;
 import net.sourceforge.peers.sip.transport.SipRequest;
 import net.sourceforge.peers.sip.transport.SipResponse;
 import net.sourceforge.peers.sip.transport.TransportManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.lang.invoke.MethodHandles;
 
 
 public abstract class RequestManager {
 
-    public static SipURI getDestinationUri(SipRequest sipRequest,
-            Logger logger) {
+    private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+
+    public static SipURI getDestinationUri(SipRequest sipRequest) {
         SipHeaders requestHeaders = sipRequest.getSipHeaders();
         SipURI destinationUri = null;
         SipHeaderFieldValue route = requestHeaders.get(
@@ -64,7 +68,7 @@ public abstract class RequestManager {
     }
 
     public static SipResponse generateResponse(SipRequest sipRequest,
-            Dialog dialog, int statusCode, String reasonPhrase) {
+                                               Dialog dialog, int statusCode, String reasonPhrase) {
         //8.2.6.2
         SipResponse sipResponse = new SipResponse(statusCode, reasonPhrase);
         SipHeaders requestHeaders = sipRequest.getSipHeaders();
@@ -96,22 +100,20 @@ public abstract class RequestManager {
     protected ByeHandler byeHandler;
     protected OptionsHandler optionsHandler;
     protected RegisterHandler registerHandler;
-    
+
     protected UserAgent userAgent;
     protected TransactionManager transactionManager;
     protected TransportManager transportManager;
-    protected Logger logger;
-    
+
     public RequestManager(UserAgent userAgent,
-            InviteHandler inviteHandler,
-            CancelHandler cancelHandler,
-            ByeHandler byeHandler,
-            OptionsHandler optionsHandler,
-            RegisterHandler registerHandler,
-            DialogManager dialogManager,
-            TransactionManager transactionManager,
-            TransportManager transportManager,
-            Logger logger) {
+                          InviteHandler inviteHandler,
+                          CancelHandler cancelHandler,
+                          ByeHandler byeHandler,
+                          OptionsHandler optionsHandler,
+                          RegisterHandler registerHandler,
+                          DialogManager dialogManager,
+                          TransactionManager transactionManager,
+                          TransportManager transportManager) {
         this.userAgent = userAgent;
         this.inviteHandler = inviteHandler;
         this.cancelHandler = cancelHandler;
@@ -120,7 +122,6 @@ public abstract class RequestManager {
         this.registerHandler = registerHandler;
         this.transactionManager = transactionManager;
         this.transportManager = transportManager;
-        this.logger = logger;
     }
 
     public InviteHandler getInviteHandler() {

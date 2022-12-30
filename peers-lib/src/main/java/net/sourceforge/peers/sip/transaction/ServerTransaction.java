@@ -25,8 +25,8 @@ import net.sourceforge.peers.sip.transport.SipResponse;
 public interface ServerTransaction {
 
     public void start();
-    
+
     public void receivedRequest(SipRequest sipRequest);
-    
+
     public void sendReponse(SipResponse sipResponse);
 }

@@ -19,22 +19,34 @@
 
 package net.sourceforge.peers.sip.transactionuser;
 
-import net.sourceforge.peers.Logger;
 import net.sourceforge.peers.sip.AbstractState;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.lang.invoke.MethodHandles;
 
 public abstract class DialogState extends AbstractState {
 
+    private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+
     protected Dialog dialog;
 
-    public DialogState(String id, Dialog dialog, Logger logger) {
-        super(id, logger);
+    public DialogState(String id, Dialog dialog) {
+        super(id);
         this.dialog = dialog;
     }
-    
-    public void receivedOrSent101To199() {}
-    public void receivedOrSent2xx() {}
-    public void receivedOrSent300To699() {}
+
+    public void receivedOrSent101To199() {
+    }
+
+    public void receivedOrSent2xx() {
+    }
+
+    public void receivedOrSent300To699() {
+    }
+
     //sent or received a BYE for RFC3261
-    public void receivedOrSentBye() {}
-    
+    public void receivedOrSentBye() {
+    }
+
 }

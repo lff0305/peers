@@ -24,17 +24,15 @@ import java.util.ArrayList;
 import net.sourceforge.peers.sip.RFC3261;
 
 
-
 public class SipHeaders {
-    
+
     private ArrayList<SipHeader> headers;
-    
+
     public SipHeaders() {
         headers = new ArrayList<SipHeader>();
     }
-    
+
     /**
-     * 
      * @param name
      * @param value
      * @param index -1 to add at the end
@@ -42,7 +40,7 @@ public class SipHeaders {
     public void add(SipHeaderFieldName name, SipHeaderFieldValue value, int index) {
         SipHeader header = new SipHeader(name, value);
         if (headers.contains(header)) {
-            header =  headers.get(headers.indexOf(header));
+            header = headers.get(headers.indexOf(header));
             SipHeaderFieldValue oldValue = header.getValue();
             //TODO check is header can be multi valued
             if (oldValue instanceof SipHeaderFieldMultiValue) {
@@ -62,19 +60,19 @@ public class SipHeaders {
             }
         }
     }
-    
+
     public void add(SipHeaderFieldName name, SipHeaderFieldValue value) {
         add(name, value, -1);
     }
-    
+
     public void remove(SipHeaderFieldName name) {
         headers.remove(new SipHeader(name, null));
     }
-    
+
     public boolean contains(SipHeaderFieldName name) {
         return headers.contains(new SipHeader(name, null));
     }
-    
+
     public SipHeaderFieldValue get(SipHeaderFieldName name) {
         int index = headers.indexOf(new SipHeader(name, null));
         if (index < 0) {
@@ -82,7 +80,7 @@ public class SipHeaders {
         }
         return headers.get(index).getValue();
     }
-    
+
     public int getCount() {
         return headers.size();
     }

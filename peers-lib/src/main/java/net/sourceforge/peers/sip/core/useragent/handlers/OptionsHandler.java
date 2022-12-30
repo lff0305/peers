@@ -20,9 +20,9 @@
 package net.sourceforge.peers.sip.core.useragent.handlers;
 
 import java.io.IOException;
+import java.lang.invoke.MethodHandles;
 import java.util.Random;
 
-import net.sourceforge.peers.Logger;
 import net.sourceforge.peers.sdp.SessionDescription;
 import net.sourceforge.peers.sip.RFC3261;
 import net.sourceforge.peers.sip.Utils;
@@ -36,16 +36,20 @@ import net.sourceforge.peers.sip.transaction.TransactionManager;
 import net.sourceforge.peers.sip.transport.SipRequest;
 import net.sourceforge.peers.sip.transport.SipResponse;
 import net.sourceforge.peers.sip.transport.TransportManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class OptionsHandler extends MethodHandler
         implements ServerTransactionUser {
 
+    private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+
     public static final int MAX_PORTS = 65536;
 
     public OptionsHandler(UserAgent userAgent,
-            TransactionManager transactionManager,
-            TransportManager transportManager, Logger logger) {
-        super(userAgent, transactionManager, transportManager, logger);
+                          TransactionManager transactionManager,
+                          TransportManager transportManager) {
+        super(userAgent, transactionManager, transportManager);
     }
 
     public void handleOptions(SipRequest sipRequest) {
@@ -54,7 +58,7 @@ public class OptionsHandler extends MethodHandler
         int localPort = new Random().nextInt(MAX_PORTS);
         try {
             SessionDescription sessionDescription =
-                sdpManager.createSessionDescription(null, localPort);
+                    sdpManager.createSessionDescription(null, localPort);
             sipResponse.setBody(sessionDescription.toString().getBytes());
         } catch (IOException e) {
             logger.error(e.getMessage(), e);
@@ -65,9 +69,9 @@ public class OptionsHandler extends MethodHandler
         sipHeaders.add(new SipHeaderFieldName(RFC3261.HDR_ALLOW),
                 new SipHeaderFieldValue(Utils.generateAllowHeader()));
         ServerTransaction serverTransaction =
-            transactionManager.createServerTransaction(
-                sipResponse, userAgent.getSipPort(), RFC3261.TRANSPORT_UDP,
-                this, sipRequest);
+                transactionManager.createServerTransaction(
+                        sipResponse, userAgent.getSipPort(), RFC3261.TRANSPORT_UDP,
+                        this, sipRequest);
         serverTransaction.start();
         serverTransaction.receivedRequest(sipRequest);
         serverTransaction.sendReponse(sipResponse);
@@ -76,7 +80,7 @@ public class OptionsHandler extends MethodHandler
     @Override
     public void transactionFailure() {
         // TODO Auto-generated method stub
-        
+
     }
 
 }

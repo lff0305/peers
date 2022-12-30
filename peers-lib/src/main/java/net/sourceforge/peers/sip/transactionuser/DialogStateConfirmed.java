@@ -19,12 +19,17 @@
 
 package net.sourceforge.peers.sip.transactionuser;
 
-import net.sourceforge.peers.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.lang.invoke.MethodHandles;
 
 public class DialogStateConfirmed extends DialogState {
 
-    public DialogStateConfirmed(String id, Dialog dialog, Logger logger) {
-        super(id, dialog, logger);
+    private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+
+    public DialogStateConfirmed(String id, Dialog dialog) {
+        super(id, dialog);
     }
 
     @Override

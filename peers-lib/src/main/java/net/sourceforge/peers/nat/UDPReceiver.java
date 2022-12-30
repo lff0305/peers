@@ -19,11 +19,17 @@
 
 package net.sourceforge.peers.nat;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
+import java.lang.invoke.MethodHandles;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 
 public class UDPReceiver extends Thread {
+
+    private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
     private DatagramSocket datagramSocket;
 
@@ -39,7 +45,7 @@ public class UDPReceiver extends Thread {
                 byte[] buf = new byte[1024];
                 DatagramPacket packet = new DatagramPacket(buf, buf.length);
                 datagramSocket.receive(packet);
-                System.out.println("< received:\n"
+                logger.info("< received:\n"
                         + new String(packet.getData()));
             }
         } catch (IOException e) {

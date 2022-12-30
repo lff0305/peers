@@ -19,8 +19,6 @@
 
 package net.sourceforge.peers.rtp;
 
-import net.sourceforge.peers.FileLogger;
-
 import org.testng.annotations.Test;
 
 public class RtpParserTestNG {
@@ -29,22 +27,22 @@ public class RtpParserTestNG {
     public void testDecode() {
         byte[] packet = new byte[172];
         int pos = 0;
-        packet[pos++] = new Integer(0x80).byteValue();
-        packet[pos++] = new Integer(0x00).byteValue();
-        packet[pos++] = new Integer(0x02).byteValue();
-        packet[pos++] = new Integer(0xaf).byteValue();
-        packet[pos++] = new Integer(0x00).byteValue();
-        packet[pos++] = new Integer(0x00).byteValue();
-        packet[pos++] = new Integer(0x01).byteValue();
-        packet[pos++] = new Integer(0x8d).byteValue();
-        packet[pos++] = new Integer(0x00).byteValue();
-        packet[pos++] = new Integer(0x00).byteValue();
-        packet[pos++] = new Integer(0x00).byteValue();
-        packet[pos++] = new Integer(0x01).byteValue();
+        packet[pos++] = Integer.valueOf(0x80).byteValue();
+        packet[pos++] = Integer.valueOf(0x00).byteValue();
+        packet[pos++] = Integer.valueOf(0x02).byteValue();
+        packet[pos++] = Integer.valueOf(0xaf).byteValue();
+        packet[pos++] = Integer.valueOf(0x00).byteValue();
+        packet[pos++] = Integer.valueOf(0x00).byteValue();
+        packet[pos++] = Integer.valueOf(0x01).byteValue();
+        packet[pos++] = Integer.valueOf(0x8d).byteValue();
+        packet[pos++] = Integer.valueOf(0x00).byteValue();
+        packet[pos++] = Integer.valueOf(0x00).byteValue();
+        packet[pos++] = Integer.valueOf(0x00).byteValue();
+        packet[pos++] = Integer.valueOf(0x01).byteValue();
         for (int i = 0; i < 160; ++i) {
-            packet[pos++] = new Integer(i).byteValue();
+            packet[pos++] = Integer.valueOf(i).byteValue();
         }
-        RtpParser rtpParser = new RtpParser(new FileLogger(null));
+        RtpParser rtpParser = new RtpParser();
         RtpPacket rtpPacket = rtpParser.decode(packet);
         assert rtpPacket.getVersion() == 2;
         assert !rtpPacket.isPadding();
@@ -57,7 +55,7 @@ public class RtpParserTestNG {
         assert rtpPacket.getSsrc() == 1;
         assert rtpPacket.getData().length == 160;
         for (int i = 0; i < 160; ++i)
-            assert (int)(rtpPacket.getData()[i] & 0xff) == i;
+            assert (int) (rtpPacket.getData()[i] & 0xff) == i;
     }
 
     @Test
@@ -74,24 +72,24 @@ public class RtpParserTestNG {
         rtpPacket.setSsrc(1);
         byte[] data = new byte[160];
         for (int i = 0; i < data.length; ++i) {
-            data[i] = new Integer(i).byteValue();
+            data[i] = Integer.valueOf(i).byteValue();
         }
         rtpPacket.setData(data);
-        RtpParser rtpParser = new RtpParser(new FileLogger(null));
+        RtpParser rtpParser = new RtpParser();
         byte[] packet = rtpParser.encode(rtpPacket);
         int pos = 0;
-        assert packet[pos++] == new Integer(0x80).byteValue();
-        assert packet[pos++] == new Integer(0x00).byteValue();
-        assert packet[pos++] == new Integer(0x02).byteValue();
-        assert packet[pos++] == new Integer(0xaf).byteValue();
-        assert packet[pos++] == new Integer(0x00).byteValue();
-        assert packet[pos++] == new Integer(0x00).byteValue();
-        assert packet[pos++] == new Integer(0x01).byteValue();
-        assert packet[pos++] == new Integer(0x8d).byteValue();
-        assert packet[pos++] == new Integer(0x00).byteValue();
-        assert packet[pos++] == new Integer(0x00).byteValue();
-        assert packet[pos++] == new Integer(0x00).byteValue();
-        assert packet[pos++] == new Integer(0x01).byteValue();
+        assert packet[pos++] == Integer.valueOf(0x80).byteValue();
+        assert packet[pos++] == Integer.valueOf(0x00).byteValue();
+        assert packet[pos++] == Integer.valueOf(0x02).byteValue();
+        assert packet[pos++] == Integer.valueOf(0xaf).byteValue();
+        assert packet[pos++] == Integer.valueOf(0x00).byteValue();
+        assert packet[pos++] == Integer.valueOf(0x00).byteValue();
+        assert packet[pos++] == Integer.valueOf(0x01).byteValue();
+        assert packet[pos++] == Integer.valueOf(0x8d).byteValue();
+        assert packet[pos++] == Integer.valueOf(0x00).byteValue();
+        assert packet[pos++] == Integer.valueOf(0x00).byteValue();
+        assert packet[pos++] == Integer.valueOf(0x00).byteValue();
+        assert packet[pos++] == Integer.valueOf(0x01).byteValue();
         for (int i = 0; i < rtpPacket.getData().length; ++i)
             assert packet[pos++] == data[i];
     }

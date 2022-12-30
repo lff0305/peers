@@ -30,7 +30,7 @@ public abstract class CallFrameState extends AbstractState {
     protected CallFrame callFrame;
     protected JPanel callPanel;
 
-    public CallFrameState(String id, CallFrame callFrame, Logger logger) {
+    public CallFrameState(String id, CallFrame callFrame, ) {
         super(id, logger);
         this.callFrame = callFrame;
     }

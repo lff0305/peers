@@ -36,8 +36,8 @@ public class SipTransportConnection {
     private String transport;// UDP, TCP or SCTP
 
     public SipTransportConnection(InetAddress localInetAddress,
-            int localPort, InetAddress remoteInetAddress, int remotePort,
-            String transport) {
+                                  int localPort, InetAddress remoteInetAddress, int remotePort,
+                                  String transport) {
         this.localInetAddress = localInetAddress;
         this.localPort = localPort;
         this.remoteInetAddress = remoteInetAddress;
@@ -50,17 +50,17 @@ public class SipTransportConnection {
         if (obj.getClass() != SipTransportConnection.class) {
             return false;
         }
-        SipTransportConnection other = (SipTransportConnection)obj;
+        SipTransportConnection other = (SipTransportConnection) obj;
         if (!transport.equalsIgnoreCase(other.transport)) {
             return false;
         }
         if (RFC3261.TRANSPORT_UDP.equalsIgnoreCase(transport)) {
             return localInetAddress.equals(other.localInetAddress) &&
-                localPort == other.localPort;
+                    localPort == other.localPort;
         }
         return false;
     }
-    
+
     @Override
     public String toString() {
         StringBuffer buf = new StringBuffer();
@@ -118,6 +118,6 @@ public class SipTransportConnection {
     public String getTransport() {
         return transport;
     }
-    
-    
+
+
 }

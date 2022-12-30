@@ -20,48 +20,49 @@
 package net.sourceforge.peers.sip.transaction;
 
 import java.io.IOException;
+import java.lang.invoke.MethodHandles;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import net.sourceforge.peers.Logger;
 import net.sourceforge.peers.sip.RFC3261;
 import net.sourceforge.peers.sip.transport.SipRequest;
 import net.sourceforge.peers.sip.transport.SipResponse;
 import net.sourceforge.peers.sip.transport.TransportManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 public class NonInviteServerTransaction extends NonInviteTransaction
         implements ServerTransaction/*, SipServerTransportUser*/ {
 
+    private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+
     public final NonInviteServerTransactionState TRYING;
     public final NonInviteServerTransactionState PROCEEDING;
     public final NonInviteServerTransactionState COMPLETED;
     public final NonInviteServerTransactionState TERMINATED;
-    
+
     protected ServerTransactionUser serverTransactionUser;
     protected Timer timer;
     protected String transport;
-    
+
     private NonInviteServerTransactionState state;
     //private int port;
-    
+
     NonInviteServerTransaction(String branchId, int port, String transport,
-            String method, ServerTransactionUser serverTransactionUser,
-            SipRequest sipRequest, Timer timer, TransportManager transportManager,
-            TransactionManager transactionManager, Logger logger) {
-        super(branchId, method, timer, transportManager, transactionManager,
-                logger);
-        
-        TRYING = new NonInviteServerTransactionStateTrying(getId(), this,
-                logger);
+                               String method, ServerTransactionUser serverTransactionUser,
+                               SipRequest sipRequest, Timer timer, TransportManager transportManager,
+                               TransactionManager transactionManager) {
+        super(branchId, method, timer, transportManager, transactionManager);
+
+        TRYING = new NonInviteServerTransactionStateTrying(getId(), this);
         state = TRYING;
         PROCEEDING = new NonInviteServerTransactionStateProceeding(getId(),
-                this, logger);
-        COMPLETED = new NonInviteServerTransactionStateCompleted(getId(), this,
-                logger);
+                this);
+        COMPLETED = new NonInviteServerTransactionStateCompleted(getId(), this);
         TERMINATED = new NonInviteServerTransactionStateTerminated(getId(),
-                this, logger);
-        
+                this);
+
         //this.port = port;
         this.transport = transport;
         this.serverTransactionUser = serverTransactionUser;
@@ -73,7 +74,7 @@ public class NonInviteServerTransaction extends NonInviteTransaction
         } catch (IOException e) {
             logger.error("input/output error", e);
         }
-        
+
         //TODO pass request to TU
     }
 
@@ -81,7 +82,7 @@ public class NonInviteServerTransaction extends NonInviteTransaction
         this.state.log(state);
         this.state = state;
     }
-    
+
     public void receivedRequest(SipRequest sipRequest) {
         state.receivedRequest();
     }
@@ -95,7 +96,7 @@ public class NonInviteServerTransaction extends NonInviteTransaction
             state.received200To699();
         }
     }
-    
+
     void sendLastResponse() {
         //sipServerTransport.sendResponse(responses.get(responses.size() - 1));
         int nbOfResponses = responses.size();
@@ -107,10 +108,10 @@ public class NonInviteServerTransaction extends NonInviteTransaction
             }
         }
     }
-    
+
     public void start() {
         // TODO Auto-generated method stub
-        
+
     }
 
 //    public void messageReceived(SipMessage sipMessage) {
@@ -124,5 +125,5 @@ public class NonInviteServerTransaction extends NonInviteTransaction
             state.timerJFires();
         }
     }
-    
+
 }

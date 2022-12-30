@@ -19,144 +19,142 @@
 
 package net.sourceforge.peers.sip.transactionuser;
 
-import net.sourceforge.peers.FileLogger;
-
 import org.testng.annotations.Test;
 
 public class DialogTestNG {
-    
+
     @Test
     public void initialState() {
-        Dialog dialog = new Dialog("", "", "", new FileLogger(null));
+        Dialog dialog = new Dialog("", "", "");
         assert dialog.getState() instanceof DialogStateInit;
     }
 
     //INIT
-    
+
     @Test
     public void transitionInitEarly() {
-        Dialog dialog = new Dialog("", "", "", new FileLogger(null));
+        Dialog dialog = new Dialog("", "", "");
         dialog.receivedOrSent1xx();
         assert dialog.getState() instanceof DialogStateEarly;
     }
 
     @Test
     public void transitionInitConfirmed() {
-        Dialog dialog = new Dialog("", "", "", new FileLogger(null));
+        Dialog dialog = new Dialog("", "", "");
         dialog.receivedOrSent2xx();
         assert dialog.getState() instanceof DialogStateConfirmed;
     }
-    
+
     @Test
     public void transitionInitTerminated() {
-        Dialog dialog = new Dialog("", "", "", new FileLogger(null));
+        Dialog dialog = new Dialog("", "", "");
         dialog.receivedOrSent300To699();
         assert dialog.getState() instanceof DialogStateTerminated;
     }
-    
+
     @Test(expectedExceptions = IllegalStateException.class)
     public void shouldThrowIfByeOnInit() {
-        Dialog dialog = new Dialog("", "", "", new FileLogger(null));
+        Dialog dialog = new Dialog("", "", "");
         dialog.receivedOrSentBye();
     }
 
     //EARLY
-    
+
     @Test
-    public void transitionEarlyEarly(){
-        Dialog dialog = new Dialog("", "", "", new FileLogger(null));
+    public void transitionEarlyEarly() {
+        Dialog dialog = new Dialog("", "", "");
         dialog.receivedOrSent1xx();
         dialog.receivedOrSent1xx();
         assert dialog.getState() instanceof DialogStateEarly;
     }
-    
+
     @Test
     public void transitionEarlyConfirmed() {
-        Dialog dialog = new Dialog("", "", "", new FileLogger(null));
+        Dialog dialog = new Dialog("", "", "");
         dialog.receivedOrSent1xx();
         dialog.receivedOrSent2xx();
         assert dialog.getState() instanceof DialogStateConfirmed;
     }
-    
+
     @Test
     public void transitionEarlyTerminated() {
-        Dialog dialog = new Dialog("", "", "", new FileLogger(null));
+        Dialog dialog = new Dialog("", "", "");
         dialog.receivedOrSent1xx();
         dialog.receivedOrSent300To699();
         assert dialog.getState() instanceof DialogStateTerminated;
     }
-    
+
     @Test(expectedExceptions = IllegalStateException.class)
     public void shouldThrowIfByeOnEarly() {
-        Dialog dialog = new Dialog("", "", "", new FileLogger(null));
+        Dialog dialog = new Dialog("", "", "");
         dialog.receivedOrSent1xx();
         dialog.receivedOrSentBye();
     }
-    
+
     //CONFIRMED
-    
+
     @Test(expectedExceptions = IllegalStateException.class)
     public void shouldThrowIf1xxOnConfirmed() {
-        Dialog dialog = new Dialog("", "", "", new FileLogger(null));
+        Dialog dialog = new Dialog("", "", "");
         dialog.receivedOrSent2xx();
         dialog.receivedOrSent1xx();
     }
-    
+
     @Test(expectedExceptions = IllegalStateException.class)
     public void shouldThrowIf2xxOnConfirmed() {
-        Dialog dialog = new Dialog("", "", "", new FileLogger(null));
+        Dialog dialog = new Dialog("", "", "");
         dialog.receivedOrSent2xx();
         dialog.receivedOrSent2xx();
     }
-    
+
     @Test(expectedExceptions = IllegalStateException.class)
     public void shouldThrowIfErrOnConfirmed() {
-        Dialog dialog = new Dialog("", "", "", new FileLogger(null));
+        Dialog dialog = new Dialog("", "", "");
         dialog.receivedOrSent2xx();
         dialog.receivedOrSent300To699();
     }
-    
+
     @Test
     public void transitionConfirmedTerminated() {
-        Dialog dialog = new Dialog("", "", "", new FileLogger(null));
+        Dialog dialog = new Dialog("", "", "");
         dialog.receivedOrSent2xx();
         dialog.receivedOrSentBye();
         assert dialog.getState() instanceof DialogStateTerminated;
     }
-    
+
     //TERMINATED
-    
+
     @Test(expectedExceptions = IllegalStateException.class)
     public void shouldThrowIf1xxOnTerminated() {
-        Dialog dialog = new Dialog("", "", "", new FileLogger(null));
+        Dialog dialog = new Dialog("", "", "");
         dialog.receivedOrSent2xx();
         dialog.receivedOrSentBye();
         dialog.receivedOrSent1xx();
     }
-    
+
     @Test(expectedExceptions = IllegalStateException.class)
     public void shouldThrowIf2xxOnTerminated() {
-        Dialog dialog = new Dialog("", "", "", new FileLogger(null));
+        Dialog dialog = new Dialog("", "", "");
         dialog.receivedOrSent2xx();
         dialog.receivedOrSentBye();
         dialog.receivedOrSent2xx();
     }
-    
+
     @Test(expectedExceptions = IllegalStateException.class)
     public void shouldThrowIfErrOnTerminated() {
-        Dialog dialog = new Dialog("", "", "", new FileLogger(null));
+        Dialog dialog = new Dialog("", "", "");
         dialog.receivedOrSent2xx();
         dialog.receivedOrSentBye();
         dialog.receivedOrSent300To699();
     }
-    
+
     // retransmissions can be sent to dialog
 //    @Test(expectedExceptions = IllegalStateException.class)
 //    public void shouldThrowIfByeOnTerminated() {
-//        Dialog dialog = new Dialog("", "", "", new FileLogger(null));
+//        Dialog dialog = new Dialog("", "", "", null);
 //        dialog.receivedOrSent2xx();
 //        dialog.receivedOrSentBye();
 //        dialog.receivedOrSentBye();
 //    }
-    
+
 }

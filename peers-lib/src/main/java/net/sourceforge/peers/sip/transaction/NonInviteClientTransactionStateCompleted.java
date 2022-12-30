@@ -19,16 +19,20 @@
 
 package net.sourceforge.peers.sip.transaction;
 
-import net.sourceforge.peers.Logger;
 import net.sourceforge.peers.sip.RFC3261;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.lang.invoke.MethodHandles;
 
 public class NonInviteClientTransactionStateCompleted extends
         NonInviteClientTransactionState {
 
+    private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+
     public NonInviteClientTransactionStateCompleted(String id,
-            NonInviteClientTransaction nonInviteClientTransaction,
-            Logger logger) {
-        super(id, nonInviteClientTransaction, logger);
+                                                    NonInviteClientTransaction nonInviteClientTransaction) {
+        super(id, nonInviteClientTransaction);
         int delay = 0;
         if (RFC3261.TRANSPORT_UDP.equals(
                 nonInviteClientTransaction.transport)) {
@@ -41,8 +45,8 @@ public class NonInviteClientTransactionStateCompleted extends
     @Override
     public void timerKFires() {
         NonInviteClientTransactionState nextState =
-            nonInviteClientTransaction.TERMINATED;
+                nonInviteClientTransaction.TERMINATED;
         nonInviteClientTransaction.setState(nextState);
     }
-    
+
 }

@@ -64,7 +64,7 @@ public class SipParserTestNG {
         assert value != null;
         assert "SIP/2.0/UDP 10.20.30.40:5060".equals(value.toString());
     }
-    
+
     @Test
     public void testParseMultilineHeader() throws SipParserException, IOException {
         SipMessage sipMessage = parse("INVITE sip:UAB@example.com SIP/2.0\r\n"
@@ -81,7 +81,7 @@ public class SipParserTestNG {
         assert "I know you're there, pick up the phone and talk to me!".equals(
                 value.toString());
     }
-    
+
     @Test
     public void testParseMultiHeader() throws SipParserException, IOException {
         SipMessage sipMessage = parse("INVITE sip:UAB@example.com SIP/2.0\r\n"
@@ -96,24 +96,24 @@ public class SipParserTestNG {
         SipHeaderFieldValue subject = sipHeaders.get(new SipHeaderFieldName("Subject"));
         assert subject != null;
         assert "Lunch".equals(subject.toString());
-        
+
         SipHeaderFieldValue route = sipHeaders.get(new SipHeaderFieldName("Route"));
         assert route != null;
         assert "<sip:alice@atlanta.com>, <sip:bob@biloxi.com>, <sip:carol@chicago.com>"
-            .equals(route.toString());
+                .equals(route.toString());
     }
-    
+
     @Test
     public void testHeaderParams() throws SipParserException, IOException {
         SipMessage sipMessage = parse("INVITE sip:UAB@example.com SIP/2.0\r\n"
                 + "Via: <sip:alice@atlanta.com>;transport=TCP\r\n"
                 + "\r\n");
         SipHeaderFieldValue value =
-            sipMessage.getSipHeaders().get(new SipHeaderFieldName("Via"));
+                sipMessage.getSipHeaders().get(new SipHeaderFieldName("Via"));
         assert "TCP".equals(value.getParam(new SipHeaderParamName("transport")));
         assert "TCP".equals(value.getParam(new SipHeaderParamName("Transport")));
     }
-    
+
     @Test
     public void testCompactHeaders() throws SipParserException, IOException {
         SipMessage sipMessage = parse("OPTIONS sip:h@google.com SIP/2.0\r\n" +
@@ -138,44 +138,44 @@ public class SipParserTestNG {
                 " p");
         SipHeaders sipHeaders = sipMessage.getSipHeaders();
         SipHeaderFieldValue callId =
-            sipHeaders.get(new SipHeaderFieldName(RFC3261.HDR_CALLID));
+                sipHeaders.get(new SipHeaderFieldName(RFC3261.HDR_CALLID));
         assert callId != null;
         assert callId.getValue().indexOf("ldkjf43532@host.domain") > -1;
         SipHeaderFieldValue contact =
-            sipHeaders.get(new SipHeaderFieldName(RFC3261.HDR_CONTACT));
+                sipHeaders.get(new SipHeaderFieldName(RFC3261.HDR_CONTACT));
         assert contact != null;
         assert contact.getValue().indexOf("<192.168.5.6:43673>") > -1;
         SipHeaderFieldValue contentEncoding =
-            sipHeaders.get(new SipHeaderFieldName(RFC3261.HDR_CONTENT_ENCODING));
+                sipHeaders.get(new SipHeaderFieldName(RFC3261.HDR_CONTENT_ENCODING));
         assert contentEncoding != null;
         assert contentEncoding.getValue().indexOf("gzip") > -1;
         SipHeaderFieldValue contentlLength =
-            sipHeaders.get(new SipHeaderFieldName(RFC3261.HDR_CONTENT_LENGTH));
+                sipHeaders.get(new SipHeaderFieldName(RFC3261.HDR_CONTENT_LENGTH));
         assert contentlLength != null;
         assert contentlLength.getValue().indexOf("15") > -1;
         assert sipMessage.getBody().length == 15;
         SipHeaderFieldValue contentType =
-            sipHeaders.get(new SipHeaderFieldName(RFC3261.HDR_CONTENT_TYPE));
+                sipHeaders.get(new SipHeaderFieldName(RFC3261.HDR_CONTENT_TYPE));
         assert contentType != null;
         assert contentType.getValue().indexOf("text/html") > -1;
         SipHeaderFieldValue from =
-            sipHeaders.get(new SipHeaderFieldName(RFC3261.HDR_FROM));
+                sipHeaders.get(new SipHeaderFieldName(RFC3261.HDR_FROM));
         assert from != null;
         assert from.getValue().indexOf("\"Jessy James\" <sip:jenny@jones.com>") > -1;
         SipHeaderFieldValue subject =
-            sipHeaders.get(new SipHeaderFieldName(RFC3261.HDR_SUBJECT));
+                sipHeaders.get(new SipHeaderFieldName(RFC3261.HDR_SUBJECT));
         assert subject != null;
         assert subject.getValue().indexOf("what about the wheather today") > -1;
         SipHeaderFieldValue supported =
-            sipHeaders.get(new SipHeaderFieldName(RFC3261.HDR_SUPPORTED));
+                sipHeaders.get(new SipHeaderFieldName(RFC3261.HDR_SUPPORTED));
         assert supported != null;
         assert supported.getValue().indexOf("INVITE,BYE, CANCEL") > -1;
         SipHeaderFieldValue to =
-            sipHeaders.get(new SipHeaderFieldName(RFC3261.HDR_TO));
+                sipHeaders.get(new SipHeaderFieldName(RFC3261.HDR_TO));
         assert to != null;
         assert to.getValue().indexOf("john the ripper <sip:john@ripper.com;killer>") > -1;
         SipHeaderFieldMultiValue via = (SipHeaderFieldMultiValue)
-            sipHeaders.get(new SipHeaderFieldName(RFC3261.HDR_VIA));
+                sipHeaders.get(new SipHeaderFieldName(RFC3261.HDR_VIA));
         assert via != null;
         List<SipHeaderFieldValue> values = via.getValues();
         assert values.get(0).getValue().indexOf("SIP/2.0/UDP 192.168.20.2") > -1;
@@ -183,7 +183,7 @@ public class SipParserTestNG {
         assert values.get(2).getValue().indexOf("SIP/2.0/UDP 10.1.5.7") > -1;
         assert values.get(3).getValue().indexOf("SIP/2.0/UDP 64.32.165.46") > -1;
     }
-    
+
     @Test
     public void testMultiValueHeader() throws IOException, SipParserException {
         SipMessage sipMessage = parse("SIP/2.0 200 OK\r\n"
@@ -212,7 +212,7 @@ public class SipParserTestNG {
         SipHeaderFieldValue recordRoute = sipHeaders.get(
                 new SipHeaderFieldName(RFC3261.HDR_RECORD_ROUTE));
         assert recordRoute instanceof SipHeaderFieldMultiValue;
-        SipHeaderFieldMultiValue recordRouteMulti = (SipHeaderFieldMultiValue)recordRoute;
+        SipHeaderFieldMultiValue recordRouteMulti = (SipHeaderFieldMultiValue) recordRoute;
         List<SipHeaderFieldValue> values = recordRouteMulti.getValues();
         assert "<sip:81.23.228.129;lr;ftag=MMnvBY6R;did=1a1.f7c24a35>".equals(
                 values.get(0).getValue().trim());
@@ -237,7 +237,7 @@ public class SipParserTestNG {
         for (int i = 0; i < expectedBody.length; ++i) {
             assert expectedBody[i] == realBody[i];
         }
-        
+
         byte[] binaryBody = new byte[0x10];
         for (byte i = 0x0; i < binaryBody.length; ++i) {
             binaryBody[i] = i;
@@ -253,15 +253,15 @@ public class SipParserTestNG {
             assert binaryBody[i] == realBody[i];
         }
     }
-    
-    @Test (expectedExceptions = SipParserException.class)
+
+    @Test(expectedExceptions = SipParserException.class)
     public void shouldThrowIfBadMessage() throws SipParserException, IOException {
         // two characters for sip line is forbidden, minimum is 3:
         // A:1
         parse("IN\r\n");
     }
-    
-    @Test (expectedExceptions = SipParserException.class)
+
+    @Test(expectedExceptions = SipParserException.class)
     public void shouldThrowIfNoEmptyLine() throws SipParserException, IOException {
         // two characters for sip line is forbidden, minimum is 3:
         // A:1
@@ -271,15 +271,15 @@ public class SipParserTestNG {
                 + "         pick up the phone\r\n"
                 + "         and talk to me!\r\n");
     }
-    
-    @Test (expectedExceptions = SipParserException.class)
+
+    @Test(expectedExceptions = SipParserException.class)
     public void shouldThrowIfBadContentLength() throws SipParserException, IOException {
         parse("INVITE sip:bob@ietf.org\r\n" +
                 "Content-Length: 10" +
                 "\r\n" +
                 "12345");
     }
-    
+
     private SipMessage parse(String message) throws SipParserException, IOException {
         ByteArrayInputStream bais = new ByteArrayInputStream(message.getBytes());
         SipParser sipParser = new SipParser();

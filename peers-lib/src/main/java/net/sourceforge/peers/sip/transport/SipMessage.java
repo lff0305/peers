@@ -25,7 +25,7 @@ import net.sourceforge.peers.sip.syntaxencoding.SipHeaderFieldValue;
 import net.sourceforge.peers.sip.syntaxencoding.SipHeaders;
 
 public abstract class SipMessage {
-    
+
     protected String sipVersion;
     protected SipHeaders sipHeaders;
     protected byte[] body;
@@ -34,7 +34,7 @@ public abstract class SipMessage {
         sipVersion = RFC3261.DEFAULT_SIP_VERSION;
         sipHeaders = new SipHeaders();
     }
-    
+
     public String getSipVersion() {
         return sipVersion;
     }
@@ -53,9 +53,9 @@ public abstract class SipMessage {
 
     public void setBody(byte[] body) {
         SipHeaderFieldName contentLengthName =
-            new SipHeaderFieldName(RFC3261.HDR_CONTENT_LENGTH);
+                new SipHeaderFieldName(RFC3261.HDR_CONTENT_LENGTH);
         SipHeaderFieldValue contentLengthValue =
-            sipHeaders.get(contentLengthName);
+                sipHeaders.get(contentLengthName);
         if (contentLengthValue == null) {
             contentLengthValue = new SipHeaderFieldValue(
                     String.valueOf(body.length));
@@ -76,5 +76,5 @@ public abstract class SipMessage {
         }
         return buf.toString();
     }
-    
+
 }

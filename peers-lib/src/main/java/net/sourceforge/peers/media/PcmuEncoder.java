@@ -19,17 +19,21 @@
 
 package net.sourceforge.peers.media;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
+import java.lang.invoke.MethodHandles;
 import java.util.concurrent.CountDownLatch;
-
-import net.sourceforge.peers.Logger;
 
 public class PcmuEncoder extends Encoder {
 
+    private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+
     private final static int cBias = 0x84;
     private final static short seg_end[] = new short[]{0xFF, 0x1FF, 0x3FF, 0x7FF,
-        0xFFF, 0x1FFF, 0x3FFF, 0x7FFF
+            0xFFF, 0x1FFF, 0x3FFF, 0x7FFF
     };
 
     /*
@@ -83,10 +87,10 @@ public class PcmuEncoder extends Encoder {
          * and complement the code word.
          */
         if (seg >= 8) /* out of range, return maximum value. */ {
-            return (byte)(0x7F ^ mask);
+            return (byte) (0x7F ^ mask);
         } else {
-            uval = (byte)((seg << 4) | ((pcm_val >> (seg + 3)) & 0xF));
-            return  (byte)(uval ^ mask);
+            uval = (byte) ((seg << 4) | ((pcm_val >> (seg + 3)) & 0xF));
+            return (byte) (uval ^ mask);
         }
 
     }
@@ -103,15 +107,15 @@ public class PcmuEncoder extends Encoder {
     }
 
     public PcmuEncoder(PipedInputStream rawData, PipedOutputStream encodedData,
-            boolean mediaDebug, Logger logger, String peersHome,
-            CountDownLatch latch) {
-        super(rawData, encodedData, mediaDebug, logger, peersHome, latch);
+                       boolean mediaDebug, String peersHome,
+                       CountDownLatch latch) {
+        super(rawData, encodedData, mediaDebug, peersHome, latch);
     }
 
     /**
      * Perform compression using U-law. Retrieved from Mobicents media server
      * code.
-     * 
+     *
      * @param media the input uncompressed media
      * @return the output compressed media.
      */
@@ -126,5 +130,5 @@ public class PcmuEncoder extends Encoder {
         return compressed;
     }
 
-    
+
 }

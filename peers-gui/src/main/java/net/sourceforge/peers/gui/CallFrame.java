@@ -63,7 +63,7 @@ public class CallFrame implements ActionListener, WindowListener {
     private SipRequest sipRequest;
 
     CallFrame(String remoteParty, String id,
-            CallFrameListener callFrameListener, Logger logger) {
+            CallFrameListener callFrameListener, ) {
         INIT = new CallFrameStateInit(id, this, logger);
         UAC = new CallFrameStateUac(id, this, logger);
         UAS = new CallFrameStateUas(id, this, logger);

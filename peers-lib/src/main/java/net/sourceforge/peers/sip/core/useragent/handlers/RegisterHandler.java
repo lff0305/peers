@@ -19,6 +19,7 @@
 
 package net.sourceforge.peers.sip.core.useragent.handlers;
 
+import java.lang.invoke.MethodHandles;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Hashtable;
@@ -26,7 +27,6 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import net.sourceforge.peers.Config;
-import net.sourceforge.peers.Logger;
 import net.sourceforge.peers.sip.RFC3261;
 import net.sourceforge.peers.sip.core.useragent.InitialRequestManager;
 import net.sourceforge.peers.sip.core.useragent.RequestManager;
@@ -47,9 +47,13 @@ import net.sourceforge.peers.sip.transaction.TransactionManager;
 import net.sourceforge.peers.sip.transport.SipRequest;
 import net.sourceforge.peers.sip.transport.SipResponse;
 import net.sourceforge.peers.sip.transport.TransportManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class RegisterHandler extends MethodHandler
         implements ClientTransactionUser {
+
+    private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
     public static final int REFRESH_MARGIN = 10; // seconds
 
@@ -60,15 +64,15 @@ public class RegisterHandler extends MethodHandler
     private String requestUriStr;
     private String profileUriStr;
     private String callIDStr;
-    
+
     //FIXME should be on a profile based context
     private boolean unregisterInvoked;
     private boolean registered;
-    
+
     public RegisterHandler(UserAgent userAgent,
-            TransactionManager transactionManager,
-            TransportManager transportManager, Logger logger) {
-        super(userAgent, transactionManager, transportManager, logger);
+                           TransactionManager transactionManager,
+                           TransportManager transportManager) {
+        super(userAgent, transactionManager, transportManager);
     }
 
     //TODO factorize common code here and in invitehandler
@@ -77,8 +81,7 @@ public class RegisterHandler extends MethodHandler
         registered = false;
         unregisterInvoked = false;
         SipHeaders sipHeaders = sipRequest.getSipHeaders();
-        SipURI destinationUri = RequestManager.getDestinationUri(sipRequest,
-                logger);
+        SipURI destinationUri = RequestManager.getDestinationUri(sipRequest);
         int port = destinationUri.getPort();
         if (port == SipURI.DEFAULT_PORT) {
             port = RFC3261.TRANSPORT_DEFAULT_PORT;
@@ -89,7 +92,7 @@ public class RegisterHandler extends MethodHandler
         if (params != null) {
             String reqUriTransport = params.get(RFC3261.PARAM_TRANSPORT);
             if (reqUriTransport != null) {
-                transport = reqUriTransport; 
+                transport = reqUriTransport;
             }
         }
         SipURI sipUri = userAgent.getConfig().getOutboundProxy();
@@ -104,8 +107,8 @@ public class RegisterHandler extends MethodHandler
                     + sipUri.getHost(), e);
         }
         ClientTransaction clientTransaction = transactionManager
-            .createClientTransaction(sipRequest, inetAddress, port,
-                    transport, null, this);
+                .createClientTransaction(sipRequest, inetAddress, port,
+                        transport, null, this);
         //TODO 10.2
         SipHeaderFieldValue to = sipHeaders.get(
                 new SipHeaderFieldName(RFC3261.HDR_TO));
@@ -116,7 +119,7 @@ public class RegisterHandler extends MethodHandler
         requestUriStr = destinationUri.toString();
         profileUriStr = NameAddress.nameAddressToUri(fromValue);
         callIDStr = sipHeaders.get(new SipHeaderFieldName(RFC3261.HDR_CALLID))
-            .toString();
+                .toString();
         // added for buggy servers like cirpack which doesn't answer with a
         // default expires value if it doesn't find any expires in request
         sipHeaders.add(new SipHeaderFieldName(RFC3261.HDR_EXPIRES),
@@ -134,23 +137,23 @@ public class RegisterHandler extends MethodHandler
     //////////////////////////////////////////////////////////
     // ClientTransactionUser methods
     //////////////////////////////////////////////////////////
-    
+
     public void errResponseReceived(SipResponse sipResponse) {
         String password = userAgent.getConfig().getPassword();
-        if (password != null &&  !"".equals(password.trim())) {
+        if (password != null && !"".equals(password.trim())) {
             int statusCode = sipResponse.getStatusCode();
             if (statusCode == RFC3261.CODE_401_UNAUTHORIZED
                     || statusCode ==
-                        RFC3261.CODE_407_PROXY_AUTHENTICATION_REQUIRED) {
+                    RFC3261.CODE_407_PROXY_AUTHENTICATION_REQUIRED) {
                 if (challenged) {
                     notifyListener(sipResponse);
                 } else {
                     challenged = true;
                     NonInviteClientTransaction nonInviteClientTransaction =
-                        (NonInviteClientTransaction)
-                        transactionManager.getClientTransaction(sipResponse);
+                            (NonInviteClientTransaction)
+                                    transactionManager.getClientTransaction(sipResponse);
                     SipRequest sipRequest =
-                        nonInviteClientTransaction.getRequest();
+                            nonInviteClientTransaction.getRequest();
                     challengeManager.handleChallenge(sipRequest, sipResponse);
                 }
             } else { // not 401 nor 407
@@ -181,7 +184,7 @@ public class RegisterHandler extends MethodHandler
                     } else { // received != via ip address
                         try {
                             InetAddress receivedInetAddress =
-                                InetAddress.getByName(received);
+                                    InetAddress.getByName(received);
                             Config config = userAgent.getConfig();
                             config.setPublicInetAddress(receivedInetAddress);
                             userAgent.register();
@@ -211,12 +214,12 @@ public class RegisterHandler extends MethodHandler
     }
 
     public void provResponseReceived(SipResponse sipResponse,
-            Transaction transaction) {
+                                     Transaction transaction) {
         //meaningless
     }
 
     public synchronized void successResponseReceived(SipResponse sipResponse,
-            Transaction transaction) {
+                                                     Transaction transaction) {
         // 1. retrieve request corresponding to response
         // 2. if request was not an unregister, extract contact and expires,
         //    and start register refresh timer
@@ -239,16 +242,16 @@ public class RegisterHandler extends MethodHandler
                 return;
             }
             expires = responseContact.getParam(expiresParam);
-        	// patch mobicents simple application
+            // patch mobicents simple application
             registered = true;
             int delay = -1;
             if (expires == null || "".equals(expires.trim())) {
                 delay = 3600;
             }
             if (!unregisterInvoked) {
-            	if (delay == -1) {
-            		delay = Integer.parseInt(expires) - REFRESH_MARGIN;
-            	}
+                if (delay == -1) {
+                    delay = Integer.parseInt(expires) - REFRESH_MARGIN;
+                }
                 timer = new Timer(getClass().getSimpleName()
                         + " refresh timer");
                 timer.schedule(new RefreshTimerTask(), delay * 1000);
@@ -274,7 +277,7 @@ public class RegisterHandler extends MethodHandler
     public boolean isRegistered() {
         return registered;
     }
-    
+
     //////////////////////////////////////////////////////////
     // TimerTask
     //////////////////////////////////////////////////////////

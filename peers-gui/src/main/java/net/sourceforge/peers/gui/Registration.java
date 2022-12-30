@@ -36,7 +36,7 @@ public class Registration {
     protected JLabel label;
     private RegistrationState state;
 
-    public Registration(JLabel label, Logger logger) {
+    public Registration(JLabel label, ) {
         this.label = label;
 
         String id = String.valueOf(hashCode());

@@ -19,7 +19,6 @@
 
 package net.sourceforge.peers.sip.core.useragent.handlers;
 
-import net.sourceforge.peers.Logger;
 import net.sourceforge.peers.sdp.SDPManager;
 import net.sourceforge.peers.sip.RFC3261;
 import net.sourceforge.peers.sip.Utils;
@@ -33,8 +32,14 @@ import net.sourceforge.peers.sip.transaction.TransactionManager;
 import net.sourceforge.peers.sip.transport.SipRequest;
 import net.sourceforge.peers.sip.transport.SipResponse;
 import net.sourceforge.peers.sip.transport.TransportManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.lang.invoke.MethodHandles;
 
 public abstract class MethodHandler {
+
+    private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
     protected UserAgent userAgent;
     protected TransactionManager transactionManager;
@@ -42,20 +47,18 @@ public abstract class MethodHandler {
     protected ChallengeManager challengeManager;
     protected SDPManager sdpManager;
     protected boolean challenged;
-    protected Logger logger;
-    
+
     public MethodHandler(UserAgent userAgent,
-            TransactionManager transactionManager,
-            TransportManager transportManager, Logger logger) {
+                         TransactionManager transactionManager,
+                         TransportManager transportManager) {
         this.userAgent = userAgent;
         this.transactionManager = transactionManager;
         this.transportManager = transportManager;
-        this.logger = logger;
         challenged = false;
     }
-    
+
     protected SipResponse buildGenericResponse(SipRequest sipRequest,
-            int statusCode, String reasonPhrase) {
+                                               int statusCode, String reasonPhrase) {
         //8.2.6
         SipResponse sipResponse = new SipResponse(statusCode, reasonPhrase);
         SipHeaders respHeaders = sipResponse.getSipHeaders();

@@ -20,11 +20,11 @@
 package net.sourceforge.peers.sip.transaction;
 
 import java.io.IOException;
+import java.lang.invoke.MethodHandles;
 import java.net.InetAddress;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import net.sourceforge.peers.Logger;
 import net.sourceforge.peers.sip.RFC3261;
 import net.sourceforge.peers.sip.syntaxencoding.SipHeaderFieldName;
 import net.sourceforge.peers.sip.syntaxencoding.SipHeaderFieldValue;
@@ -34,60 +34,63 @@ import net.sourceforge.peers.sip.transport.SipClientTransportUser;
 import net.sourceforge.peers.sip.transport.SipRequest;
 import net.sourceforge.peers.sip.transport.SipResponse;
 import net.sourceforge.peers.sip.transport.TransportManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 public class NonInviteClientTransaction extends NonInviteTransaction
         implements ClientTransaction, SipClientTransportUser {
+
+    private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
     public final NonInviteClientTransactionState INIT;
     public final NonInviteClientTransactionState TRYING;
     public final NonInviteClientTransactionState PROCEEDING;
     public final NonInviteClientTransactionState COMPLETED;
     public final NonInviteClientTransactionState TERMINATED;
-    
+
     protected ClientTransactionUser transactionUser;
     protected String transport;
     protected int nbRetrans;
-    
+
     private NonInviteClientTransactionState state;
     //private SipClientTransport sipClientTransport;
     private MessageSender messageSender;
     private int remotePort;
     private InetAddress remoteInetAddress;
-    
+
     NonInviteClientTransaction(String branchId, InetAddress inetAddress,
-            int port, String transport, SipRequest sipRequest,
-            ClientTransactionUser transactionUser, Timer timer,
-            TransportManager transportManager,
-            TransactionManager transactionManager, Logger logger) {
+                               int port, String transport, SipRequest sipRequest,
+                               ClientTransactionUser transactionUser, Timer timer,
+                               TransportManager transportManager,
+                               TransactionManager transactionManager) {
         super(branchId, sipRequest.getMethod(), timer, transportManager,
-                transactionManager, logger);
-        
+                transactionManager);
+
         this.transport = transport;
-        
+
         SipHeaderFieldValue via = new SipHeaderFieldValue("");
         via.addParam(new SipHeaderParamName(RFC3261.PARAM_BRANCH), branchId);
         sipRequest.getSipHeaders().add(new SipHeaderFieldName(RFC3261.HDR_VIA), via, 0);
-        
+
         nbRetrans = 0;
-        
-        INIT = new NonInviteClientTransactionStateInit(getId(), this, logger);
+
+        INIT = new NonInviteClientTransactionStateInit(getId(), this);
         state = INIT;
-        TRYING = new NonInviteClientTransactionStateTrying(getId(), this,
-                logger);
+        TRYING = new NonInviteClientTransactionStateTrying(getId(), this);
         PROCEEDING = new NonInviteClientTransactionStateProceeding(getId(),
-                this, logger);
+                this);
         COMPLETED = new NonInviteClientTransactionStateCompleted(getId(),
-                this, logger);
+                this);
         TERMINATED = new NonInviteClientTransactionStateTerminated(getId(),
-                this, logger);
-        
+                this);
+
         request = sipRequest;
         this.transactionUser = transactionUser;
-        
+
         remotePort = port;
         remoteInetAddress = inetAddress;
-        
+
         try {
             messageSender = transportManager.createClientTransport(
                     request, remoteInetAddress, remotePort, transport);
@@ -97,7 +100,7 @@ public class NonInviteClientTransaction extends NonInviteTransaction
         }
         //TODO send request
     }
-    
+
     public void setState(NonInviteClientTransactionState state) {
         this.state.log(state);
         this.state = state;
@@ -105,9 +108,9 @@ public class NonInviteClientTransaction extends NonInviteTransaction
 
     public void start() {
         state.start();
-        
+
         //17.1.2.2
-        
+
 //        try {
 //            sipClientTransport = SipTransportFactory.getInstance()
 //                    .createClientTransport(this, request, remoteInetAddress,
@@ -123,15 +126,15 @@ public class NonInviteClientTransaction extends NonInviteTransaction
             logger.error("input/output error", e);
             transportError();
         }
-        
+
         if (RFC3261.TRANSPORT_UDP.equals(transport)) {
             //start timer E with value T1 for retransmission
             timer.schedule(new TimerE(), RFC3261.TIMER_T1);
         }
-    
+
         timer.schedule(new TimerF(), 64 * RFC3261.TIMER_T1);
     }
-    
+
     void sendRetrans(long delay) {
         //sipClientTransport.send(request);
         try {
@@ -142,11 +145,11 @@ public class NonInviteClientTransaction extends NonInviteTransaction
         }
         timer.schedule(new TimerE(), delay);
     }
-    
+
     public void transportError() {
         state.transportError();
     }
-    
+
     public synchronized void receivedResponse(SipResponse sipResponse) {
         responses.add(sipResponse);
         // 17.1.1
@@ -161,31 +164,31 @@ public class NonInviteClientTransaction extends NonInviteTransaction
             logger.error("invalid response code");
         }
     }
-    
+
     public void requestTransportError(SipRequest sipRequest, Exception e) {
         // TODO Auto-generated method stub
-        
+
     }
 
     public void responseTransportError(Exception e) {
         // TODO Auto-generated method stub
-        
+
     }
-    
+
     class TimerE extends TimerTask {
         @Override
         public void run() {
             state.timerEFires();
         }
     }
-    
+
     class TimerF extends TimerTask {
         @Override
         public void run() {
             state.timerFFires();
         }
     }
-    
+
     class TimerK extends TimerTask {
         @Override
         public void run() {

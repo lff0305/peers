@@ -19,11 +19,11 @@
 
 package net.sourceforge.peers.sip.core.useragent;
 
+import java.lang.invoke.MethodHandles;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Hashtable;
 
-import net.sourceforge.peers.Logger;
 import net.sourceforge.peers.sip.RFC3261;
 import net.sourceforge.peers.sip.core.useragent.handlers.ByeHandler;
 import net.sourceforge.peers.sip.core.useragent.handlers.CancelHandler;
@@ -45,21 +45,24 @@ import net.sourceforge.peers.sip.transactionuser.DialogManager;
 import net.sourceforge.peers.sip.transport.SipRequest;
 import net.sourceforge.peers.sip.transport.SipResponse;
 import net.sourceforge.peers.sip.transport.TransportManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 public class MidDialogRequestManager extends RequestManager
         implements ClientTransactionUser, ServerTransactionUser {
 
+    private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+
     public MidDialogRequestManager(UserAgent userAgent,
-            InviteHandler inviteHandler,
-            CancelHandler cancelHandler,
-            ByeHandler byeHandler,
-            OptionsHandler optionsHandler,
-            RegisterHandler registerHandler,
-            DialogManager dialogManager,
-            TransactionManager transactionManager,
-            TransportManager transportManager,
-            Logger logger) {
+                                   InviteHandler inviteHandler,
+                                   CancelHandler cancelHandler,
+                                   ByeHandler byeHandler,
+                                   OptionsHandler optionsHandler,
+                                   RegisterHandler registerHandler,
+                                   DialogManager dialogManager,
+                                   TransactionManager transactionManager,
+                                   TransportManager transportManager) {
         super(userAgent,
                 inviteHandler,
                 cancelHandler,
@@ -68,8 +71,7 @@ public class MidDialogRequestManager extends RequestManager
                 registerHandler,
                 dialogManager,
                 transactionManager,
-                transportManager,
-                logger);
+                transportManager);
     }
 
 
@@ -78,8 +80,8 @@ public class MidDialogRequestManager extends RequestManager
     ////////////////////////////////////////////////
 
     public void generateMidDialogRequest(Dialog dialog,
-            String method, MessageInterceptor messageInterceptor) {
-        
+                                         String method, MessageInterceptor messageInterceptor) {
+
 
         SipRequest sipRequest = dialog.buildSubsequentRequest(RFC3261.METHOD_BYE);
 
@@ -90,7 +92,7 @@ public class MidDialogRequestManager extends RequestManager
         //transaction creation
         if (!RFC3261.METHOD_INVITE.equals(method)) {
             ClientTransaction clientTransaction = createNonInviteClientTransaction(
-            		sipRequest, null, byeHandler);
+                    sipRequest, null, byeHandler);
             if (messageInterceptor != null) {
                 messageInterceptor.postProcess(sipRequest);
             }
@@ -101,16 +103,15 @@ public class MidDialogRequestManager extends RequestManager
             //TODO client transaction user is managed by invite handler directly
         }
 
-        
+
     }
-    
-    
+
+
     public ClientTransaction createNonInviteClientTransaction(
             SipRequest sipRequest, String branchId,
             ClientTransactionUser clientTransactionUser) {
         //8.1.2
-        SipURI destinationUri = RequestManager.getDestinationUri(sipRequest,
-                logger);
+        SipURI destinationUri = RequestManager.getDestinationUri(sipRequest);
 
         //TODO if header route is present, addrspec = toproute.nameaddress.addrspec
         String transport = RFC3261.TRANSPORT_UDP;
@@ -118,7 +119,7 @@ public class MidDialogRequestManager extends RequestManager
         if (params != null) {
             String reqUriTransport = params.get(RFC3261.PARAM_TRANSPORT);
             if (reqUriTransport != null) {
-                transport = reqUriTransport; 
+                transport = reqUriTransport;
             }
         }
         int port = destinationUri.getPort();
@@ -137,21 +138,12 @@ public class MidDialogRequestManager extends RequestManager
             return null;
         }
         ClientTransaction clientTransaction = transactionManager
-            .createClientTransaction(sipRequest, inetAddress, port, transport,
-                    branchId, clientTransactionUser);
+                .createClientTransaction(sipRequest, inetAddress, port, transport,
+                        branchId, clientTransactionUser);
         return clientTransaction;
     }
-    
-    
-    
-    
-    
 
-    
-    
-    
-    
-    
+
     ////////////////////////////////////////////////
     // methods for UAS
     ////////////////////////////////////////////////
@@ -159,7 +151,7 @@ public class MidDialogRequestManager extends RequestManager
     public void manageMidDialogRequest(SipRequest sipRequest, Dialog dialog) {
         SipHeaders sipHeaders = sipRequest.getSipHeaders();
         SipHeaderFieldValue cseq =
-            sipHeaders.get(new SipHeaderFieldName(RFC3261.HDR_CSEQ));
+                sipHeaders.get(new SipHeaderFieldName(RFC3261.HDR_CSEQ));
         String cseqStr = cseq.getValue();
         int pos = cseqStr.indexOf(' ');
         if (pos < 0) {
@@ -177,11 +169,11 @@ public class MidDialogRequestManager extends RequestManager
                     RFC3261.CODE_500_SERVER_INTERNAL_ERROR,
                     RFC3261.REASON_500_SERVER_INTERNAL_ERROR);
             ServerTransaction serverTransaction =
-                transactionManager.createServerTransaction(
-                        sipResponse,
-                        userAgent.getSipPort(),
-                        RFC3261.TRANSPORT_UDP,
-                        this, sipRequest);
+                    transactionManager.createServerTransaction(
+                            sipResponse,
+                            userAgent.getSipPort(),
+                            RFC3261.TRANSPORT_UDP,
+                            this, sipRequest);
             serverTransaction.start();
             serverTransaction.receivedRequest(sipRequest);
             serverTransaction.sendReponse(sipResponse);
@@ -207,7 +199,7 @@ public class MidDialogRequestManager extends RequestManager
     @Override
     public void transactionFailure() {
         // TODO Auto-generated method stub
-        
+
     }
 
 
@@ -215,39 +207,39 @@ public class MidDialogRequestManager extends RequestManager
     // ClientTransactionUser methods
     ///////////////////////////////////////
     // callbacks employed for cancel responses (ignored)
-	@Override
-	public void transactionTimeout(ClientTransaction clientTransaction) {
-		// TODO Auto-generated method stub
-		
-	}
+    @Override
+    public void transactionTimeout(ClientTransaction clientTransaction) {
+        // TODO Auto-generated method stub
+
+    }
 
 
-	@Override
-	public void provResponseReceived(SipResponse sipResponse,
-			Transaction transaction) {
-		// TODO Auto-generated method stub
-		
-	}
+    @Override
+    public void provResponseReceived(SipResponse sipResponse,
+                                     Transaction transaction) {
+        // TODO Auto-generated method stub
+
+    }
 
 
-	@Override
-	public void errResponseReceived(SipResponse sipResponse) {
-		// TODO Auto-generated method stub
-		
-	}
+    @Override
+    public void errResponseReceived(SipResponse sipResponse) {
+        // TODO Auto-generated method stub
+
+    }
 
 
-	@Override
-	public void successResponseReceived(SipResponse sipResponse,
-			Transaction transaction) {
-		// TODO Auto-generated method stub
-		
-	}
+    @Override
+    public void successResponseReceived(SipResponse sipResponse,
+                                        Transaction transaction) {
+        // TODO Auto-generated method stub
+
+    }
 
 
-	@Override
-	public void transactionTransportError() {
-		// TODO Auto-generated method stub
-		
-	}
+    @Override
+    public void transactionTransportError() {
+        // TODO Auto-generated method stub
+
+    }
 }

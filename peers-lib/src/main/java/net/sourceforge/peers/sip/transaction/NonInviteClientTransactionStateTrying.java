@@ -19,24 +19,27 @@
 
 package net.sourceforge.peers.sip.transaction;
 
-import net.sourceforge.peers.Logger;
 import net.sourceforge.peers.sip.RFC3261;
 import net.sourceforge.peers.sip.transport.SipResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.lang.invoke.MethodHandles;
 
 public class NonInviteClientTransactionStateTrying extends
         NonInviteClientTransactionState {
+    private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
     public NonInviteClientTransactionStateTrying(String id,
-            NonInviteClientTransaction nonInviteClientTransaction,
-            Logger logger) {
-        super(id, nonInviteClientTransaction, logger);
+                                                 NonInviteClientTransaction nonInviteClientTransaction) {
+        super(id, nonInviteClientTransaction);
     }
 
     @Override
     public void timerEFires() {
         NonInviteClientTransactionState nextState = nonInviteClientTransaction.TRYING;
         nonInviteClientTransaction.setState(nextState);
-        long delay = (long)Math.pow(2,
+        long delay = (long) Math.pow(2,
                 ++nonInviteClientTransaction.nbRetrans) * RFC3261.TIMER_T1;
         nonInviteClientTransaction.sendRetrans(Math.min(delay, RFC3261.TIMER_T2));
     }
@@ -45,19 +48,19 @@ public class NonInviteClientTransactionStateTrying extends
     public void timerFFires() {
         timerFFiresOrTransportError();
     }
-    
+
     @Override
     public void transportError() {
         timerFFiresOrTransportError();
     }
-    
+
     private void timerFFiresOrTransportError() {
         NonInviteClientTransactionState nextState = nonInviteClientTransaction.TERMINATED;
         nonInviteClientTransaction.setState(nextState);
         nonInviteClientTransaction.transactionUser.transactionTimeout(
                 nonInviteClientTransaction);
     }
-    
+
     @Override
     public void received1xx() {
         NonInviteClientTransactionState nextState = nonInviteClientTransaction.PROCEEDING;
@@ -65,7 +68,7 @@ public class NonInviteClientTransactionStateTrying extends
         nonInviteClientTransaction.transactionUser.provResponseReceived(
                 nonInviteClientTransaction.getLastResponse(), nonInviteClientTransaction);
     }
-    
+
     @Override
     public void received200To699() {
         NonInviteClientTransactionState nextState = nonInviteClientTransaction.COMPLETED;
@@ -80,5 +83,5 @@ public class NonInviteClientTransactionStateTrying extends
                     response);
         }
     }
-    
+
 }

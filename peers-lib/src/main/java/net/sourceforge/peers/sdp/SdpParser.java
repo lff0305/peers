@@ -32,74 +32,74 @@ import net.sourceforge.peers.rtp.RFC3551;
 
 public class SdpParser {
 
-	public SessionDescription parse(byte[] body) throws IOException {
-		if (body == null || body.length == 0) {
-			return null;
-		}
-		ByteArrayInputStream in = new ByteArrayInputStream(body);
-		InputStreamReader inputStreamReader = new InputStreamReader(in);
-		BufferedReader reader = new BufferedReader(inputStreamReader);
-		SessionDescription sessionDescription = new SessionDescription();
-		
-		//version
-		
-		String line = reader.readLine();
-		if (line.length() < 3) {
-			return null;
-		}
-		if (line.charAt(0) != RFC4566.TYPE_VERSION
-				|| line.charAt(1) != RFC4566.SEPARATOR
-				|| line.charAt(2) != RFC4566.VERSION) {
-			return null;
-		}
+    public SessionDescription parse(byte[] body) throws IOException {
+        if (body == null || body.length == 0) {
+            return null;
+        }
+        ByteArrayInputStream in = new ByteArrayInputStream(body);
+        InputStreamReader inputStreamReader = new InputStreamReader(in);
+        BufferedReader reader = new BufferedReader(inputStreamReader);
+        SessionDescription sessionDescription = new SessionDescription();
 
-		//origin
-		
-		line = reader.readLine();
-		if (line.length() < 3) {
-			return null;
-		}
-		if (line.charAt(0) != RFC4566.TYPE_ORIGIN
-				|| line.charAt(1) != RFC4566.SEPARATOR) {
-			return null;
-		}
-		line = line.substring(2);
-		String[] originArr = line.split(" ");
-		if (originArr == null || originArr.length != 6) {
-			return null;
-		}
-		sessionDescription.setUsername(originArr[0]);
-		sessionDescription.setId(Long.parseLong(originArr[1]));
-		sessionDescription.setVersion(Long.parseLong(originArr[2]));
-		sessionDescription.setIpAddress(InetAddress.getByName(originArr[5]));
+        //version
 
-		//name
-		
-		line = reader.readLine();
-		if (line.length() < 3) {
-			return null;
-		}
-		if (line.charAt(0) != RFC4566.TYPE_SUBJECT
-				|| line.charAt(1) != RFC4566.SEPARATOR) {
-			return null;
-		}
-		sessionDescription.setName(line.substring(2));
-		
-		//session connection and attributes
+        String line = reader.readLine();
+        if (line.length() < 3) {
+            return null;
+        }
+        if (line.charAt(0) != RFC4566.TYPE_VERSION
+                || line.charAt(1) != RFC4566.SEPARATOR
+                || line.charAt(2) != RFC4566.VERSION) {
+            return null;
+        }
+
+        //origin
+
+        line = reader.readLine();
+        if (line.length() < 3) {
+            return null;
+        }
+        if (line.charAt(0) != RFC4566.TYPE_ORIGIN
+                || line.charAt(1) != RFC4566.SEPARATOR) {
+            return null;
+        }
+        line = line.substring(2);
+        String[] originArr = line.split(" ");
+        if (originArr == null || originArr.length != 6) {
+            return null;
+        }
+        sessionDescription.setUsername(originArr[0]);
+        sessionDescription.setId(Long.parseLong(originArr[1]));
+        sessionDescription.setVersion(Long.parseLong(originArr[2]));
+        sessionDescription.setIpAddress(InetAddress.getByName(originArr[5]));
+
+        //name
+
+        line = reader.readLine();
+        if (line.length() < 3) {
+            return null;
+        }
+        if (line.charAt(0) != RFC4566.TYPE_SUBJECT
+                || line.charAt(1) != RFC4566.SEPARATOR) {
+            return null;
+        }
+        sessionDescription.setName(line.substring(2));
+
+        //session connection and attributes
         Hashtable<String, String> sessionAttributes = new Hashtable<String, String>();
         sessionDescription.setAttributes(sessionAttributes);
-		
-		while ((line = reader.readLine()) != null
-				&& line.charAt(0) != RFC4566.TYPE_MEDIA) {
-			if (line.length() > 3
-					&& line.charAt(0) == RFC4566.TYPE_CONNECTION
-					&& line.charAt(1) == RFC4566.SEPARATOR) {
-				String connection = parseConnection(line.substring(2));
-				if (connection == null) {
-					continue;
-				}
-				sessionDescription.setIpAddress(InetAddress.getByName(connection));
-			} else if (line.length() > 3
+
+        while ((line = reader.readLine()) != null
+                && line.charAt(0) != RFC4566.TYPE_MEDIA) {
+            if (line.length() > 3
+                    && line.charAt(0) == RFC4566.TYPE_CONNECTION
+                    && line.charAt(1) == RFC4566.SEPARATOR) {
+                String connection = parseConnection(line.substring(2));
+                if (connection == null) {
+                    continue;
+                }
+                sessionDescription.setIpAddress(InetAddress.getByName(connection));
+            } else if (line.length() > 3
                     && line.charAt(0) == RFC4566.TYPE_ATTRIBUTE
                     && line.charAt(1) == RFC4566.SEPARATOR) {
                 String value = line.substring(2);
@@ -111,12 +111,12 @@ public class SdpParser {
                     sessionAttributes.put(value, "");
                 }
             }
-		}
-		if (line == null) {
-			return null;
-		}
-		//we are at the first media line
-        
+        }
+        if (line == null) {
+            return null;
+        }
+        //we are at the first media line
+
         ArrayList<SdpLine> mediaLines = new ArrayList<SdpLine>();
         do {
             if (line.length() < 3) {
@@ -131,10 +131,10 @@ public class SdpParser {
             mediaLines.add(mediaLine);
         }
         while ((line = reader.readLine()) != null);
-        
+
         ArrayList<MediaDescription> mediaDescriptions = new ArrayList<MediaDescription>();
         sessionDescription.setMediaDescriptions(mediaDescriptions);
-        
+
         for (SdpLine sdpLine : mediaLines) {
             MediaDescription mediaDescription;
             if (sdpLine.getType() == RFC4566.TYPE_MEDIA) {
@@ -154,15 +154,15 @@ public class SdpParser {
                     codec.setPayloadType(payloadType);
                     String name;
                     switch (payloadType) {
-                    case RFC3551.PAYLOAD_TYPE_PCMU:
-                        name = RFC3551.PCMU;
-                        break;
-                    case RFC3551.PAYLOAD_TYPE_PCMA:
-                        name = RFC3551.PCMA;
-                        break;
-                    default:
-                        name = "unsupported";
-                        break;
+                        case RFC3551.PAYLOAD_TYPE_PCMU:
+                            name = RFC3551.PCMU;
+                            break;
+                        case RFC3551.PAYLOAD_TYPE_PCMA:
+                            name = RFC3551.PCMA;
+                            break;
+                        default:
+                            name = "unsupported";
+                            break;
                     }
                     codec.setName(name);
                     codecs.add(codec);
@@ -188,7 +188,7 @@ public class SdpParser {
                             try {
                                 payloadType = Integer.parseInt(value.substring(0, pos));
                                 List<Codec> codecs = mediaDescription.getCodecs();
-                                for (Codec codec: codecs) {
+                                for (Codec codec : codecs) {
                                     if (codec.getPayloadType() == payloadType) {
                                         value = value.substring(pos + 1);
                                         pos = value.indexOf("/");
@@ -222,15 +222,15 @@ public class SdpParser {
                 description.setIpAddress(sessionAddress);
             }
         }
-		return sessionDescription;
-	}
-	
-	private String parseConnection(String line) {
-		String[] connectionArr = line.split(" ");
-		if (connectionArr == null || connectionArr.length != 3) {
-			return null;
-		}
-		return connectionArr[2];
-	}
-	
+        return sessionDescription;
+    }
+
+    private String parseConnection(String line) {
+        String[] connectionArr = line.split(" ");
+        if (connectionArr == null || connectionArr.length != 3) {
+            return null;
+        }
+        return connectionArr[2];
+    }
+
 }

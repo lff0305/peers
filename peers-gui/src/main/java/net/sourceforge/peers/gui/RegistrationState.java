@@ -27,7 +27,7 @@ public abstract class RegistrationState extends AbstractState {
     protected Registration registration;
 
     public RegistrationState(String id, Registration registration,
-            Logger logger) {
+            ) {
         super(id, logger);
         this.registration = registration;
     }

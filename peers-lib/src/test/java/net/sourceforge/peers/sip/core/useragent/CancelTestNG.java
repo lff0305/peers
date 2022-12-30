@@ -46,22 +46,20 @@ public class CancelTestNG {
 
     @BeforeTest
     public void init() throws SocketException, InterruptedException,
-            UnknownHostException{
+            UnknownHostException {
 
         Config config = new JavaConfig();
         config.setLocalInetAddress(InetAddress.getLocalHost());
         config.setMediaMode(MediaMode.none);
         user1SipListener = new UserSipListener();
         AbstractSoundManager soundManager = new DummySoundManager();
-        testUser1 = new UserAgent(user1SipListener, config, null,
-                soundManager);
+        testUser1 = new UserAgent(user1SipListener, config, soundManager);
 
         config = new JavaConfig();
         config.setLocalInetAddress(InetAddress.getLocalHost());
         config.setMediaMode(MediaMode.none);
         user2SipListener = new UserSipListener();
-        testUser2 = new UserAgent(user2SipListener, config, null,
-                soundManager);
+        testUser2 = new UserAgent(user2SipListener, config, soundManager);
 
     }
 
@@ -99,7 +97,8 @@ public class CancelTestNG {
         }
 
         @Override
-        public void calleePickup(SipResponse sipResponse) { }
+        public void calleePickup(SipResponse sipResponse) {
+        }
 
         @Override
         public void error(SipResponse sipResponse) {
@@ -112,20 +111,25 @@ public class CancelTestNG {
         }
 
         @Override
-        public void registerFailed(SipResponse sipResponse) { }
+        public void registerFailed(SipResponse sipResponse) {
+        }
 
         @Override
-        public void registerSuccessful(SipResponse sipResponse) { }
+        public void registerSuccessful(SipResponse sipResponse) {
+        }
 
         @Override
-        public void registering(SipRequest sipRequest) { }
+        public void registering(SipRequest sipRequest) {
+        }
 
         @Override
-        public void remoteHangup(SipRequest sipRequest) { }
+        public void remoteHangup(SipRequest sipRequest) {
+        }
 
         @Override
-        public void ringing(SipResponse sipResponse) { }
-        
+        public void ringing(SipResponse sipResponse) {
+        }
+
     }
 
 }

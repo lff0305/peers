@@ -43,7 +43,7 @@ public class AccountFrame extends javax.swing.JFrame {
     private Logger logger;
 
     /** Creates new form AccountFrame */
-    public AccountFrame(UserAgent userAgent, Logger logger) {
+    public AccountFrame(UserAgent userAgent, ) {
         this.userAgent = userAgent;
         this.logger = logger;
         unregistering = false;

@@ -26,13 +26,13 @@ public class SipRequest extends SipMessage {
     protected String method;
     protected SipURI requestUri;
     //protected String requestUri;
-    
+
     public SipRequest(String method, SipURI requestUri) {
         super();
         this.method = method;
         this.requestUri = requestUri;
     }
-    
+
     @Override
     public String toString() {
         StringBuffer buf = new StringBuffer();
@@ -49,5 +49,5 @@ public class SipRequest extends SipMessage {
     public SipURI getRequestUri() {
         return requestUri;
     }
-    
+
 }

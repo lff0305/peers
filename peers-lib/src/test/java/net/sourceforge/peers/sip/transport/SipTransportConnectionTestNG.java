@@ -31,11 +31,11 @@ public class SipTransportConnectionTestNG {
         int port = 5060;
         InetAddress localhost = InetAddress.getLocalHost();
         SipTransportConnection sipTransportConnection1 =
-            new SipTransportConnection(localhost, port,
-                    localhost, port, "udp");
+                new SipTransportConnection(localhost, port,
+                        localhost, port, "udp");
         SipTransportConnection sipTransportConnection2 =
-            new SipTransportConnection(localhost, port,
-                    localhost, port, "UDP");
+                new SipTransportConnection(localhost, port,
+                        localhost, port, "UDP");
         assert sipTransportConnection1.equals(sipTransportConnection2);
     }
 

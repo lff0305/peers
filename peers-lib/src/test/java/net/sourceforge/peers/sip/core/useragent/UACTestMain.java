@@ -21,7 +21,6 @@ package net.sourceforge.peers.sip.core.useragent;
 
 import java.net.SocketException;
 
-import net.sourceforge.peers.FileLogger;
 import net.sourceforge.peers.media.AbstractSoundManager;
 import net.sourceforge.peers.sip.syntaxencoding.SipUriSyntaxException;
 import net.sourceforge.peers.sip.transport.SipRequest;
@@ -34,13 +33,12 @@ public class UACTestMain {
         SipRequest sipRequest;
         AbstractSoundManager soundManager = new DummySoundManager();
         try {
-            userAgent = new UserAgent(null, (String)null, new FileLogger(null),
-                    soundManager);
+            userAgent = new UserAgent(null, (String)null, soundManager);
             requestUri = "sip:bob@" + userAgent.getConfig()
-                .getLocalInetAddress().getHostAddress() + ":6060";
+                    .getLocalInetAddress().getHostAddress() + ":6060";
             sipRequest = userAgent.invite(requestUri,
                     userAgent.getConfig()
-                        .getLocalInetAddress().getHostName());
+                            .getLocalInetAddress().getHostName());
         } catch (SipUriSyntaxException e) {
             e.printStackTrace();
             return;
@@ -48,13 +46,13 @@ public class UACTestMain {
             e.printStackTrace();
             return;
         }
-        
+
         try {
             Thread.sleep(20000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        
+
         if (sipRequest != null) {
             userAgent.terminate(sipRequest);
         }

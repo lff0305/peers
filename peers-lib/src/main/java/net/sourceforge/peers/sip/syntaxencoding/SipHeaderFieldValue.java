@@ -27,9 +27,9 @@ import net.sourceforge.peers.sip.RFC3261;
 public class SipHeaderFieldValue {
 
     private String value;
-    
+
     private HashMap<SipHeaderParamName, String> params;
-    
+
     public SipHeaderFieldValue(String value) {
         int startPos = value.indexOf(RFC3261.RIGHT_ANGLE_BRACKET);
         int pos;
@@ -40,7 +40,7 @@ public class SipHeaderFieldValue {
         }
         String paramsString;
         if (pos > -1) {
-            this.value = value.substring(0,pos);
+            this.value = value.substring(0, pos);
             paramsString = value.substring(pos);
         } else {
             this.value = value;
@@ -67,15 +67,15 @@ public class SipHeaderFieldValue {
     public String getParam(SipHeaderParamName name) {
         return params.get(name);
     }
-    
+
     public void addParam(SipHeaderParamName name, String value) {
         params.put(name, value);
     }
-    
+
     public void removeParam(SipHeaderParamName name) {
         params.remove(name);
     }
-    
+
     public String getValue() {
         return value;
     }
@@ -90,7 +90,7 @@ public class SipHeaderFieldValue {
             return value;
         }
         StringBuffer buf = new StringBuffer(value);
-        for (SipHeaderParamName name: params.keySet()) {
+        for (SipHeaderParamName name : params.keySet()) {
             buf.append(RFC3261.PARAM_SEPARATOR).append(name);
             String value = params.get(name);
             if (!"".equals(value.trim())) {

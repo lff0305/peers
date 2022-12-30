@@ -20,29 +20,32 @@
 package net.sourceforge.peers.sip.transport;
 
 import java.io.IOException;
+import java.lang.invoke.MethodHandles;
 import java.net.InetAddress;
 
 import net.sourceforge.peers.Config;
-import net.sourceforge.peers.FileLogger;
 import net.sourceforge.peers.JavaConfig;
 import net.sourceforge.peers.sip.RFC3261;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 public class UdpMessageReceiverTestMain implements Runnable {
+    private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
     public void run() {
         try {
             Config config = new JavaConfig();
             config.setLocalInetAddress(InetAddress.getLocalHost());
             TransportManager transportManager = new TransportManager(null,
-                    config, new FileLogger(null));
+                    config);
             transportManager.createServerTransport("UDP", RFC3261.TRANSPORT_DEFAULT_PORT);
         } catch (IOException e) {
             e.printStackTrace();
             return;
         }
     }
-    
+
     public static void main(String[] args) {
         for (int i = 0; i < 5; ++i) {
             new Thread(new UdpMessageReceiverTestMain()).start();

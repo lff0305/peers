@@ -20,30 +20,36 @@
 package net.sourceforge.peers.sip.transport;
 
 import java.io.IOException;
+import java.lang.invoke.MethodHandles;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
-import java.security.AccessController;
 import java.security.PrivilegedAction;
 
 import net.sourceforge.peers.Config;
-import net.sourceforge.peers.Logger;
 import net.sourceforge.peers.sip.RFC3261;
 import net.sourceforge.peers.sip.transaction.TransactionManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 public class UdpMessageReceiver extends MessageReceiver {
 
+    private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+
+    final int noException = 0;
+    final int socketTimeoutException = 1;
+    final int ioException = 2;
+
     private DatagramSocket datagramSocket;
-    
+
     public UdpMessageReceiver(DatagramSocket datagramSocket,
-            TransactionManager transactionManager,
-            TransportManager transportManager, Config config,
-            Logger logger)
+                              TransactionManager transactionManager,
+                              TransportManager transportManager, Config config)
             throws SocketException {
         super(datagramSocket.getLocalPort(), transactionManager,
-                transportManager, config, logger);
+                transportManager, config);
         this.datagramSocket = datagramSocket;
     }
 
@@ -51,33 +57,18 @@ public class UdpMessageReceiver extends MessageReceiver {
     protected void listen() throws IOException {
         byte[] buf = new byte[BUFFER_SIZE];
         final DatagramPacket packet = new DatagramPacket(buf, buf.length);
-        final int noException = 0;
-        final int socketTimeoutException = 1;
-        final int ioException = 2;
+
         // AccessController.doPrivileged added for plugin compatibility
-        int result = AccessController.doPrivileged(
-            new PrivilegedAction<Integer>() {
-                public Integer run() {
-                    try {
-                        datagramSocket.receive(packet);
-                    } catch (SocketTimeoutException e) {
-                        return socketTimeoutException;
-                    } catch (IOException e) {
-                        logger.error("cannot receive packet", e);
-                        return ioException;
-                    }
-                    return noException;
-                }
-            });
+        int result = receive(packet);
         switch (result) {
-        case socketTimeoutException:
-            return;
-        case ioException:
-            throw new IOException();
-        case noException:
-            break;
-        default:
-            break;
+            case socketTimeoutException:
+                return;
+            case ioException:
+                throw new IOException();
+            case noException:
+                break;
+            default:
+                break;
         }
         byte[] trimmedPacket = new byte[packet.getLength()];
         System.arraycopy(packet.getData(), 0,
@@ -86,5 +77,15 @@ public class UdpMessageReceiver extends MessageReceiver {
                 packet.getPort(), RFC3261.TRANSPORT_UDP);
     }
 
-
+    private int receive(DatagramPacket packet) {
+        try {
+            datagramSocket.receive(packet);
+        } catch (SocketTimeoutException e) {
+            return socketTimeoutException;
+        } catch (IOException e) {
+            logger.error("cannot receive packet", e);
+            return ioException;
+        }
+        return noException;
+    }
 }

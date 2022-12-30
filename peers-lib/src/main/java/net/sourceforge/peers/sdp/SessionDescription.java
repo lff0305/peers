@@ -27,12 +27,12 @@ import java.util.List;
 
 public class SessionDescription {
 
-	private long id;
-	private long version;
-	private String name;
-	private String username;
-	private InetAddress ipAddress;
-	private List<MediaDescription> mediaDescriptions;
+    private long id;
+    private long version;
+    private String name;
+    private String username;
+    private InetAddress ipAddress;
+    private List<MediaDescription> mediaDescriptions;
     private Hashtable<String, String> attributes;
 
     public long getId() {
@@ -90,7 +90,7 @@ public class SessionDescription {
     public void setAttributes(Hashtable<String, String> attributes) {
         this.attributes = attributes;
     }
-	
+
     @Override
     public String toString() {
         StringBuffer buf = new StringBuffer();
@@ -112,7 +112,7 @@ public class SessionDescription {
         buf.append("c=IN IP").append(ipVersion).append(" ");
         buf.append(hostAddress).append("\r\n");
         buf.append("t=0 0\r\n");
-        for (String attributeName: attributes.keySet()) {
+        for (String attributeName : attributes.keySet()) {
             String attributeValue = attributes.get(attributeName);
             buf.append("a=").append(attributeName);
             if (attributeValue != null && !"".equals(attributeValue.trim())) {
@@ -121,7 +121,7 @@ public class SessionDescription {
                 buf.append("\r\n");
             }
         }
-        for (MediaDescription mediaDescription: mediaDescriptions) {
+        for (MediaDescription mediaDescription : mediaDescriptions) {
             buf.append(mediaDescription.toString());
         }
         return buf.toString();

@@ -35,9 +35,9 @@ import net.sourceforge.peers.sip.transport.SipResponse;
 public class SipParser {
 
     private BufferedReader reader;
-    
+
     private final static int BUFF_SIZE = 1024;
-    
+
     private List<SipHeaderFieldName> singleValueHeaders;
 
     public SipParser() {
@@ -58,10 +58,10 @@ public class SipParser {
 
     public synchronized SipMessage parse(InputStream in)
             throws IOException, SipParserException {
-        
+
         InputStreamReader inputStreamReader = new InputStreamReader(in);
         reader = new BufferedReader(inputStreamReader);
-        
+
         String startLine = reader.readLine();
         while (startLine == null || startLine.equals("")) {
             startLine = reader.readLine();
@@ -69,15 +69,14 @@ public class SipParser {
         SipMessage sipMessage;
         if (startLine.toUpperCase().startsWith(RFC3261.DEFAULT_SIP_VERSION)) {
             sipMessage = parseSipResponse(startLine);
-        }
-        else {
+        } else {
             sipMessage = parseSipRequest(startLine);
         }
         parseHeaders(sipMessage);
         parseBody(sipMessage);
         return sipMessage;
     }
-    
+
     private SipRequest parseSipRequest(String startLine) throws SipParserException {
         String[] params = startLine.split(" ");
         if (params.length != 3) {
@@ -94,7 +93,7 @@ public class SipParser {
         }
         return new SipRequest(params[0], requestUri);
     }
-    
+
     private SipResponse parseSipResponse(String startLine) throws SipParserException {
         String[] params = startLine.split(" ");
         if (params.length < 3) {
@@ -110,7 +109,7 @@ public class SipParser {
         buf.deleteCharAt(buf.length() - 1);
         return new SipResponse(Integer.parseInt(params[1]), buf.toString());
     }
-    
+
     private void parseHeaders(SipMessage sipMessage) throws IOException, SipParserException {
         SipHeaders sipHeaders = new SipHeaders();
         String headerLine = reader.readLine();
@@ -145,8 +144,8 @@ public class SipParser {
                     value.indexOf(RFC3261.HEADER_SEPARATOR) > -1) {
                 String[] values = value.split(RFC3261.HEADER_SEPARATOR);
                 List<SipHeaderFieldValue> list =
-                    new ArrayList<SipHeaderFieldValue>();
-                for (String s: values) {
+                        new ArrayList<SipHeaderFieldValue>();
+                for (String s : values) {
                     list.add(new SipHeaderFieldValue(s));
                 }
                 sipHeaderValue = new SipHeaderFieldMultiValue(list);
@@ -158,11 +157,11 @@ public class SipParser {
         }
         sipMessage.setSipHeaders(sipHeaders);
     }
-    
+
     public void parseBody(SipMessage sipMessage) throws IOException, SipParserException {
         SipHeaderFieldValue contentLengthValue =
-            sipMessage.getSipHeaders().get(new SipHeaderFieldName(
-                    RFC3261.HDR_CONTENT_LENGTH));
+                sipMessage.getSipHeaders().get(new SipHeaderFieldName(
+                        RFC3261.HDR_CONTENT_LENGTH));
         if (contentLengthValue == null) {
             return;
         }
@@ -175,9 +174,9 @@ public class SipParser {
                 byte[] aux = new byte[buff.length + BUFF_SIZE];
                 System.arraycopy(buff, 0, aux, 0, buff.length);
                 buff = aux;
-                
+
             }
-            buff[count++] = (byte)i;
+            buff[count++] = (byte) i;
         }
         if (count != buff.length) {
             byte[] aux = new byte[count];

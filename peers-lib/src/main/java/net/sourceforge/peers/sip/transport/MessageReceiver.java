@@ -24,10 +24,10 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
+import java.lang.invoke.MethodHandles;
 import java.net.InetAddress;
 
 import net.sourceforge.peers.Config;
-import net.sourceforge.peers.Logger;
 import net.sourceforge.peers.sip.RFC3261;
 import net.sourceforge.peers.sip.Utils;
 import net.sourceforge.peers.sip.syntaxencoding.SipHeaderFieldValue;
@@ -36,33 +36,35 @@ import net.sourceforge.peers.sip.syntaxencoding.SipParserException;
 import net.sourceforge.peers.sip.transaction.ClientTransaction;
 import net.sourceforge.peers.sip.transaction.ServerTransaction;
 import net.sourceforge.peers.sip.transaction.TransactionManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public abstract class MessageReceiver implements Runnable {
 
+    private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+
     public static final int BUFFER_SIZE = 2048;//FIXME should correspond to MTU 1024;
     public static final String CHARACTER_ENCODING = "US-ASCII";
-    
+
     protected int port;
     private boolean isListening;
-    
+
     //private UAS uas;
     private SipServerTransportUser sipServerTransportUser;
     private TransactionManager transactionManager;
     private TransportManager transportManager;
     private Config config;
-    protected Logger logger;
 
     public MessageReceiver(int port, TransactionManager transactionManager,
-            TransportManager transportManager, Config config, Logger logger) {
+                           TransportManager transportManager, Config config) {
         super();
         this.port = port;
         this.transactionManager = transactionManager;
         this.transportManager = transportManager;
         this.config = config;
-        this.logger = logger;
         isListening = true;
     }
-    
+
     public void run() {
         while (isListening) {
             try {
@@ -74,7 +76,7 @@ public abstract class MessageReceiver implements Runnable {
     }
 
     protected abstract void listen() throws IOException;
-    
+
     protected boolean isRequest(byte[] message) {
         String beginning = null;
         try {
@@ -88,11 +90,11 @@ public abstract class MessageReceiver implements Runnable {
         }
         return true;
     }
-    
+
     protected void processMessage(byte[] message, InetAddress sourceIp,
-            int sourcePort, String transport) throws IOException {
+                                  int sourcePort, String transport) throws IOException {
         ByteArrayInputStream byteArrayInputStream =
-            new ByteArrayInputStream(message);
+                new ByteArrayInputStream(message);
         InputStreamReader inputStreamReader = new InputStreamReader(
                 byteArrayInputStream);
         BufferedReader reader = new BufferedReader(inputStreamReader);
@@ -106,8 +108,8 @@ public abstract class MessageReceiver implements Runnable {
         if (!startLine.contains(RFC3261.DEFAULT_SIP_VERSION)) {
             // keep-alive, send back to sender
             SipTransportConnection sipTransportConnection =
-                new SipTransportConnection(config.getLocalInetAddress(),
-                        port, sourceIp, sourcePort, transport);
+                    new SipTransportConnection(config.getLocalInetAddress(),
+                            port, sourceIp, sourcePort, transport);
             MessageSender messageSender = transportManager.getMessageSender(
                     sipTransportConnection);
             if (messageSender != null) {
@@ -118,7 +120,7 @@ public abstract class MessageReceiver implements Runnable {
         StringBuffer direction = new StringBuffer();
         direction.append("RECEIVED from ").append(sourceIp.getHostAddress());
         direction.append("/").append(sourcePort);
-        logger.traceNetwork(new String(message),
+        logger.trace(new String(message),
                 direction.toString());
         SipMessage sipMessage = null;
         try {
@@ -136,12 +138,12 @@ public abstract class MessageReceiver implements Runnable {
         // RFC3261 18.2
 
         if (sipMessage instanceof SipRequest) {
-            SipRequest sipRequest = (SipRequest)sipMessage;
-            
-            
+            SipRequest sipRequest = (SipRequest) sipMessage;
+
+
             SipHeaderFieldValue topVia = Utils.getTopVia(sipRequest);
             String sentBy =
-                topVia.getParam(new SipHeaderParamName(RFC3261.PARAM_SENTBY));
+                    topVia.getParam(new SipHeaderParamName(RFC3261.PARAM_SENTBY));
             if (sentBy != null) {
                 int colonPos = sentBy.indexOf(RFC3261.TRANSPORT_PORT_SEP);
                 if (colonPos < 0) {
@@ -150,7 +152,7 @@ public abstract class MessageReceiver implements Runnable {
                 sentBy = sentBy.substring(0, colonPos);
                 if (!InetAddress.getByName(sentBy).equals(sourceIp)) {
                     topVia.addParam(new SipHeaderParamName(
-                            RFC3261.PARAM_RECEIVED),
+                                    RFC3261.PARAM_RECEIVED),
                             sourceIp.getHostAddress());
                 }
             }
@@ -163,9 +165,9 @@ public abstract class MessageReceiver implements Runnable {
                 topVia.removeParam(rportName);
                 topVia.addParam(rportName, String.valueOf(sourcePort));
             }
-            
+
             ServerTransaction serverTransaction =
-                transactionManager.getServerTransaction(sipRequest);
+                    transactionManager.getServerTransaction(sipRequest);
             if (serverTransaction == null) {
                 //uas.messageReceived(sipMessage);
                 sipServerTransportUser.messageReceived(sipMessage);
@@ -173,9 +175,9 @@ public abstract class MessageReceiver implements Runnable {
                 serverTransaction.receivedRequest(sipRequest);
             }
         } else {
-            SipResponse sipResponse = (SipResponse)sipMessage;
+            SipResponse sipResponse = (SipResponse) sipMessage;
             ClientTransaction clientTransaction =
-                transactionManager.getClientTransaction(sipResponse);
+                    transactionManager.getClientTransaction(sipResponse);
             logger.debug("ClientTransaction = " + clientTransaction);
             if (clientTransaction == null) {
                 //uas.messageReceived(sipMessage);
@@ -185,7 +187,7 @@ public abstract class MessageReceiver implements Runnable {
             }
         }
     }
-    
+
     public synchronized void setListening(boolean isListening) {
         this.isListening = isListening;
     }
@@ -202,5 +204,5 @@ public abstract class MessageReceiver implements Runnable {
 //    public void setUas(UAS uas) {
 //        this.uas = uas;
 //    }
-    
+
 }

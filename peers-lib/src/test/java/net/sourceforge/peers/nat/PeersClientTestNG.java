@@ -31,13 +31,13 @@ import org.testng.annotations.Test;
 public class PeersClientTestNG {
 
     private PeersClient peersClient;
-    
+
     @BeforeClass
     public void init() {
         peersClient = new PeersClientStub("alice@atlanta.com", new DataReceiver() {
             public void dataReceived(byte[] data, String peerId) {
                 Reporter.log("received bytes from " + peerId + ": "
-                                        + new String(data));
+                        + new String(data));
             }
         });
     }

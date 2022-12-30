@@ -19,38 +19,42 @@
 
 package net.sourceforge.peers.media;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
+import java.lang.invoke.MethodHandles;
 import java.util.concurrent.CountDownLatch;
-
-import net.sourceforge.peers.Logger;
 
 public class PcmaEncoder extends Encoder {
 
+    private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+
     private final static int cClip = 32635;
     private static byte aLawCompressTable[] = new byte[]{
-        1, 1, 2, 2, 3, 3, 3, 3,
-        4, 4, 4, 4, 4, 4, 4, 4,
-        5, 5, 5, 5, 5, 5, 5, 5,
-        5, 5, 5, 5, 5, 5, 5, 5,
-        6, 6, 6, 6, 6, 6, 6, 6,
-        6, 6, 6, 6, 6, 6, 6, 6,
-        6, 6, 6, 6, 6, 6, 6, 6,
-        6, 6, 6, 6, 6, 6, 6, 6,
-        7, 7, 7, 7, 7, 7, 7, 7,
-        7, 7, 7, 7, 7, 7, 7, 7,
-        7, 7, 7, 7, 7, 7, 7, 7,
-        7, 7, 7, 7, 7, 7, 7, 7,
-        7, 7, 7, 7, 7, 7, 7, 7,
-        7, 7, 7, 7, 7, 7, 7, 7,
-        7, 7, 7, 7, 7, 7, 7, 7,
-        7, 7, 7, 7, 7, 7, 7, 7
+            1, 1, 2, 2, 3, 3, 3, 3,
+            4, 4, 4, 4, 4, 4, 4, 4,
+            5, 5, 5, 5, 5, 5, 5, 5,
+            5, 5, 5, 5, 5, 5, 5, 5,
+            6, 6, 6, 6, 6, 6, 6, 6,
+            6, 6, 6, 6, 6, 6, 6, 6,
+            6, 6, 6, 6, 6, 6, 6, 6,
+            6, 6, 6, 6, 6, 6, 6, 6,
+            7, 7, 7, 7, 7, 7, 7, 7,
+            7, 7, 7, 7, 7, 7, 7, 7,
+            7, 7, 7, 7, 7, 7, 7, 7,
+            7, 7, 7, 7, 7, 7, 7, 7,
+            7, 7, 7, 7, 7, 7, 7, 7,
+            7, 7, 7, 7, 7, 7, 7, 7,
+            7, 7, 7, 7, 7, 7, 7, 7,
+            7, 7, 7, 7, 7, 7, 7, 7
     };
 
     public PcmaEncoder(PipedInputStream rawData, PipedOutputStream encodedData,
-            boolean mediaDebug, Logger logger, String peersHome,
-            CountDownLatch latch) {
-        super(rawData, encodedData, mediaDebug, logger, peersHome, latch);
+                       boolean mediaDebug, String peersHome,
+                       CountDownLatch latch) {
+        super(rawData, encodedData, mediaDebug, peersHome, latch);
     }
 
     @Override
@@ -67,7 +71,7 @@ public class PcmaEncoder extends Encoder {
 
     /**
      * Compress 16bit value to 8bit value
-     * 
+     *
      * @param sample 16-bit sample
      * @return compressed 8-bit value.
      */

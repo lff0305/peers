@@ -19,18 +19,20 @@
 
 package net.sourceforge.peers.sip.transaction;
 
+import java.lang.invoke.MethodHandles;
 import java.util.Timer;
 
-import net.sourceforge.peers.Logger;
 import net.sourceforge.peers.sip.transport.TransportManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public abstract class NonInviteTransaction extends Transaction {
+    private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
     protected NonInviteTransaction(String branchId, String method, Timer timer,
-            TransportManager transportManager,
-            TransactionManager transactionManager, Logger logger) {
-        super(branchId, method, timer, transportManager, transactionManager,
-                logger);
+                                   TransportManager transportManager,
+                                   TransactionManager transactionManager) {
+        super(branchId, method, timer, transportManager, transactionManager);
     }
 
 }

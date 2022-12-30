@@ -19,10 +19,10 @@
 
 package net.sourceforge.peers.sip.transactionuser;
 
+import java.lang.invoke.MethodHandles;
 import java.util.Collection;
 import java.util.Hashtable;
 
-import net.sourceforge.peers.Logger;
 import net.sourceforge.peers.sip.RFC3261;
 import net.sourceforge.peers.sip.syntaxencoding.SipHeaderFieldName;
 import net.sourceforge.peers.sip.syntaxencoding.SipHeaderFieldValue;
@@ -30,21 +30,23 @@ import net.sourceforge.peers.sip.syntaxencoding.SipHeaderParamName;
 import net.sourceforge.peers.sip.syntaxencoding.SipHeaders;
 import net.sourceforge.peers.sip.transport.SipMessage;
 import net.sourceforge.peers.sip.transport.SipResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 public class DialogManager {
-    
+
+    private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+
     private Hashtable<String, Dialog> dialogs;
-    private Logger logger;
-    
-    public DialogManager(Logger logger) {
-        this.logger = logger;
+
+    public DialogManager() {
         dialogs = new Hashtable<String, Dialog>();
     }
 
     /**
      * @param sipResponse sip response must contain a To tag, a
-     *        From tag and a Call-ID
+     *                    From tag and a Call-ID
      * @return the new Dialog created
      */
     public synchronized Dialog createDialog(SipResponse sipResponse) {
@@ -60,15 +62,15 @@ public class DialogManager {
         Dialog dialog;
         if (sipHeaders.get(new SipHeaderFieldName(RFC3261.HDR_VIA)) == null) {
             //createDialog is called from UAS side, in layer Transaction User
-            dialog = new Dialog(callID, toTag, fromTag, logger);
+            dialog = new Dialog(callID, toTag, fromTag);
         } else {
             //createDialog is called from UAC side, in syntax encoding layer
-            dialog = new Dialog(callID, fromTag, toTag, logger);
+            dialog = new Dialog(callID, fromTag, toTag);
         }
         dialogs.put(dialog.getId(), dialog);
         return dialog;
     }
-    
+
     public void removeDialog(String dialogId) {
         dialogs.remove(dialogId);
     }
@@ -99,7 +101,7 @@ public class DialogManager {
         }
         return null;
     }
-    
+
     private String getDialogId(String callID, String localTag, String remoteTag) {
         StringBuffer buf = new StringBuffer();
         buf.append(callID);
@@ -109,7 +111,7 @@ public class DialogManager {
         buf.append(remoteTag);
         return buf.toString();
     }
-    
+
     public Collection<Dialog> getDialogCollection() {
         return dialogs.values();
     }

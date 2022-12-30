@@ -29,7 +29,7 @@ import net.sourceforge.peers.Logger;
 public class RegistrationStateRegistering extends RegistrationState {
 
     public RegistrationStateRegistering(String id, Registration registration,
-            Logger logger) {
+            ) {
         super(id, registration, logger);
     }
 

@@ -19,15 +19,20 @@
 
 package net.sourceforge.peers.sip.transaction;
 
-import net.sourceforge.peers.Logger;
 import net.sourceforge.peers.sip.RFC3261;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.lang.invoke.MethodHandles;
 
 public class InviteServerTransactionStateCompleted extends
         InviteServerTransactionState {
 
+    private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+
     public InviteServerTransactionStateCompleted(String id,
-            InviteServerTransaction inviteServerTransaction, Logger logger) {
-        super(id, inviteServerTransaction, logger);
+                                                 InviteServerTransaction inviteServerTransaction) {
+        super(id, inviteServerTransaction);
     }
 
     @Override
@@ -35,20 +40,20 @@ public class InviteServerTransactionStateCompleted extends
         InviteServerTransactionState nextState = inviteServerTransaction.COMPLETED;
         inviteServerTransaction.setState(nextState);
         inviteServerTransaction.sendLastResponse();
-        long delay = (long)Math.pow(2,
+        long delay = (long) Math.pow(2,
                 ++inviteServerTransaction.nbRetrans) * RFC3261.TIMER_T1;
         inviteServerTransaction.timer.schedule(
                 inviteServerTransaction.new TimerG(),
                 Math.min(delay, RFC3261.TIMER_T2));
     }
-    
+
     @Override
     public void timerHFiresOrTransportError() {
         InviteServerTransactionState nextState = inviteServerTransaction.TERMINATED;
         inviteServerTransaction.setState(nextState);
         inviteServerTransaction.serverTransactionUser.transactionFailure();
     }
-    
+
     @Override
     public void receivedAck() {
         InviteServerTransactionState nextState = inviteServerTransaction.CONFIRMED;
@@ -62,7 +67,7 @@ public class InviteServerTransactionStateCompleted extends
         inviteServerTransaction.timer.schedule(
                 inviteServerTransaction.new TimerI(), delay);
     }
-    
+
     @Override
     public void receivedInvite() {
         InviteServerTransactionState nextState = inviteServerTransaction.COMPLETED;
@@ -70,5 +75,5 @@ public class InviteServerTransactionStateCompleted extends
         // retransmission
         inviteServerTransaction.sendLastResponse();
     }
-    
+
 }

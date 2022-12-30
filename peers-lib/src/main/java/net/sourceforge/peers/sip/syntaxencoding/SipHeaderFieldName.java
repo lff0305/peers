@@ -22,7 +22,7 @@ package net.sourceforge.peers.sip.syntaxencoding;
 public class SipHeaderFieldName {
 
     private final static SipHeadersTable SIP_HEADER_TABLE =
-        new SipHeadersTable();
+            new SipHeadersTable();
 
     private String name;
 
@@ -40,7 +40,7 @@ public class SipHeaderFieldName {
         if (obj == null) {
             return false;
         }
-        String objName = ((SipHeaderFieldName)obj).getName();
+        String objName = ((SipHeaderFieldName) obj).getName();
         if (name.equalsIgnoreCase(objName)) {
             return true;
         }
@@ -51,11 +51,11 @@ public class SipHeaderFieldName {
     public int hashCode() {
         return name.hashCode();
     }
-    
+
     public String getName() {
         return name;
     }
-    
+
     @Override
     public String toString() {
         return name;

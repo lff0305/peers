@@ -47,7 +47,7 @@ public class Codec {
         if (!(obj instanceof Codec)) {
             return false;
         }
-        Codec codec = (Codec)obj;
+        Codec codec = (Codec) obj;
         if (codec.getName() == null) {
             return name == null;
         }
