@@ -33,11 +33,14 @@
             <artifactId>peers-lib</artifactId>
             <version>${project.version}</version>
         </dependency>
+
+
         <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>peers-javaxsound</artifactId>
-            <version>${project.version}</version>
+            <groupId>net.sourceforge.peers</groupId>
+            <artifactId>peers-lib</artifactId>
+            <version>0.5.1-SNAPSHOT</version>
         </dependency>
+
     </dependencies>
 
 
