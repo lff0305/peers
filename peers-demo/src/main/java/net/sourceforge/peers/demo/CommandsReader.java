@@ -1,5 +1,8 @@
 package net.sourceforge.peers.demo;
 
+import net.sourceforge.peers.Config;
+import net.sourceforge.peers.sip.core.useragent.UserAgent;
+import net.sourceforge.peers.sip.syntaxencoding.SipUriSyntaxException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -58,5 +61,5 @@ public class CommandsReader extends Thread {
     public synchronized void setRunning(boolean isRunning) {
         this.isRunning = isRunning;
     }
-    
+
 }

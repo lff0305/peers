@@ -16,37 +16,28 @@ public class EventManager implements SipListener {
     private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
     private UserAgent userAgent;
     private SipRequest sipRequest;
-    private CommandsReader commandsReader;
-    
+
     public EventManager() throws SocketException {
         Config config = new CustomConfig();
         userAgent = new UserAgent(this, config);
-        new Thread() {
-            public void run() {
-                try {
-                    userAgent.register();
-                } catch (SipUriSyntaxException e) {
-                    e.printStackTrace();
-                }
-            }
-        }.start();
-        commandsReader = new CommandsReader(this);
-        commandsReader.start();
+        try {
+            userAgent.register();
+        } catch (SipUriSyntaxException e) {
+            logger.error("Failed to Register", e);
+            return;
+        }
+        String callee = "sip:11110011@34.199.3.47";
+        call(callee);
     }
     
     
     // commands methods
     public void call(final String callee) {
-        new Thread() {
-            @Override
-            public void run() {
-                try {
-                    sipRequest = userAgent.invite(callee, null);
-                } catch (SipUriSyntaxException e) {
-                    e.printStackTrace();
-                }
-            }
-        }.start();
+        try {
+            sipRequest = userAgent.invite(callee, null);
+        } catch (SipUriSyntaxException e) {
+            throw new RuntimeException(e);
+        }
     }
     
     public void hangup() {
