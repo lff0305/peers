@@ -82,14 +82,13 @@ public class CancelHandler extends DialogMethodHandler
                         RFC3261.TRANSPORT_UDP, this, sipRequest);
         cancelServerTransaction.start();
         cancelServerTransaction.receivedRequest(sipRequest);
-        cancelServerTransaction.sendReponse(cancelResponse);
+        cancelServerTransaction.sendResponse(cancelResponse);
         if (cancelResponse.getStatusCode() != RFC3261.CODE_200_OK) {
             return;
         }
 
         SipResponse lastResponse = inviteServerTransaction.getLastResponse();
-        if (lastResponse != null &&
-                lastResponse.getStatusCode() >= RFC3261.CODE_200_OK) {
+        if (lastResponse != null &&       lastResponse.getStatusCode() >= RFC3261.CODE_200_OK) {
             return;
         }
 
@@ -97,7 +96,7 @@ public class CancelHandler extends DialogMethodHandler
                 inviteServerTransaction.getRequest(),
                 RFC3261.CODE_487_REQUEST_TERMINATED,
                 RFC3261.REASON_487_REQUEST_TERMINATED);
-        inviteServerTransaction.sendReponse(inviteResponse);
+        inviteServerTransaction.sendResponse(inviteResponse);
 
         Dialog dialog = dialogManager.getDialog(lastResponse);
         dialog.receivedOrSent300To699();

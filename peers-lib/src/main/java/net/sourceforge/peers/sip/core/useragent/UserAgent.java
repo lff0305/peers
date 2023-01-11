@@ -80,21 +80,19 @@ public class UserAgent {
     private SipListener sipListener;
 
     private SDPManager sdpManager;
-    private AbstractSoundManager soundManager;
     private MediaManager mediaManager;
 
-    public UserAgent(SipListener sipListener, String peersHome, AbstractSoundManager soundManager)
+    public UserAgent(SipListener sipListener, String peersHome)
             throws SocketException {
-        this(sipListener, null, peersHome, soundManager);
+        this(sipListener, null, peersHome);
     }
 
-    public UserAgent(SipListener sipListener, Config config, AbstractSoundManager soundManager)
+    public UserAgent(SipListener sipListener, Config config)
             throws SocketException {
-        this(sipListener, config, null, soundManager);
+        this(sipListener, config, null);
     }
 
-    private UserAgent(SipListener sipListener, Config config, String peersHome, AbstractSoundManager soundManager)
-            throws SocketException {
+    private UserAgent(SipListener sipListener, Config config, String peersHome) throws SocketException {
         this.sipListener = sipListener;
         if (peersHome == null) {
             peersHome = Utils.DEFAULT_PEERS_HOME;
@@ -209,7 +207,6 @@ public class UserAgent {
         optionsHandler.setSdpManager(sdpManager);
         // soundManager  = new SoundManager(config.isMediaDebug(), logger,
         // this.peersHome);
-        this.soundManager = soundManager;
         mediaManager = new MediaManager(this);
     }
 
@@ -357,10 +354,6 @@ public class UserAgent {
 
     public SipListener getSipListener() {
         return sipListener;
-    }
-
-    public AbstractSoundManager getSoundManager() {
-        return soundManager;
     }
 
     public MediaManager getMediaManager() {

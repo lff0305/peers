@@ -4,7 +4,6 @@ import java.lang.invoke.MethodHandles;
 import java.net.SocketException;
 
 import net.sourceforge.peers.Config;
-import net.sourceforge.peers.javaxsound.JavaxSoundManager;
 import net.sourceforge.peers.sip.core.useragent.SipListener;
 import net.sourceforge.peers.sip.core.useragent.UserAgent;
 import net.sourceforge.peers.sip.syntaxencoding.SipUriSyntaxException;
@@ -21,8 +20,7 @@ public class EventManager implements SipListener {
     
     public EventManager() throws SocketException {
         Config config = new CustomConfig();
-        JavaxSoundManager javaxSoundManager = new JavaxSoundManager(false, null);
-        userAgent = new UserAgent(this, config, javaxSoundManager);
+        userAgent = new UserAgent(this, config);
         new Thread() {
             public void run() {
                 try {

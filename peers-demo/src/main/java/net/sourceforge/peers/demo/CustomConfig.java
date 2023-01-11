@@ -53,7 +53,7 @@ public class CustomConfig implements Config {
     @Override public String getMediaFile() {
         return "media.raw";
     }
-    @Override public int getRtpPort() { return 0; }
+    @Override public int getRtpPort() { return 30000; }
     @Override public void setLocalInetAddress(InetAddress inetAddress) { }
     @Override public void setUserPart(String userPart) { }
     @Override public void setDomain(String domain) { }

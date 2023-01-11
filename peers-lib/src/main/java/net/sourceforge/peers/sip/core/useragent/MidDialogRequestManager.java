@@ -176,7 +176,7 @@ public class MidDialogRequestManager extends RequestManager
                             this, sipRequest);
             serverTransaction.start();
             serverTransaction.receivedRequest(sipRequest);
-            serverTransaction.sendReponse(sipResponse);
+            serverTransaction.sendResponse(sipResponse);
         } else {
             dialog.setRemoteCSeq(newCseq);
         }

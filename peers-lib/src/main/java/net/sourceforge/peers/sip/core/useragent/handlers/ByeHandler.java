@@ -101,7 +101,7 @@ public class ByeHandler extends DialogMethodHandler
 
         serverTransaction.receivedRequest(sipRequest);
 
-        serverTransaction.sendReponse(sipResponse);
+        serverTransaction.sendResponse(sipResponse);
 
         dialogManager.removeDialog(dialog.getId());
 

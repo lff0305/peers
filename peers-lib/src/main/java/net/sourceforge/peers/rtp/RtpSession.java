@@ -66,7 +66,7 @@ public class RtpSession {
         this.mediaDebug = mediaDebug;
         this.peersHome = peersHome;
         this.datagramSocket = datagramSocket;
-        rtpListeners = new ArrayList<RtpListener>();
+        rtpListeners = new ArrayList<>();
         rtpParser = new RtpParser();
         executorService = Executors.newSingleThreadExecutor();
     }

@@ -107,7 +107,7 @@ public class InviteHandler extends DialogMethodHandler
         inviteServerTransaction.receivedRequest(sipRequest);
 
         //TODO send 180 more than once
-        inviteServerTransaction.sendReponse(sipResponse);
+        inviteServerTransaction.sendResponse(sipResponse);
 
         dialog.receivedOrSent1xx();
 
@@ -168,7 +168,10 @@ public class InviteHandler extends DialogMethodHandler
             } catch (SocketException e) {
                 logger.error("cannot create datagram socket ", e);
             }
-            logger.info("new rtp DatagramSocket {} on {}", datagramSocket.hashCode(), datagramSocket.getLocalPort());
+            logger.info("New rtp DatagramSocket: local addr {}, localPort {}, Port {}",
+                    datagramSocket.getLocalAddress(),
+                    datagramSocket.getLocalPort(),
+                    datagramSocket.getPort());
             try {
                 datagramSocket.setSoTimeout(TIMEOUT);
             } catch (SocketException e) {
@@ -257,8 +260,7 @@ public class InviteHandler extends DialogMethodHandler
         // TODO determine port and transport for server transaction>transport
         // from initial invite
         // FIXME determine port and transport for server transaction>transport
-        ServerTransaction serverTransaction = transactionManager
-                .getServerTransaction(sipRequest);
+        ServerTransaction serverTransaction = transactionManager.getServerTransaction(sipRequest);
         if (serverTransaction == null) {
             // in re-INVITE case, no serverTransaction has been created
             serverTransaction = (InviteServerTransaction)
@@ -270,7 +272,7 @@ public class InviteHandler extends DialogMethodHandler
 
         serverTransaction.receivedRequest(sipRequest);
 
-        serverTransaction.sendReponse(sipResponse);
+        serverTransaction.sendResponse(sipResponse);
         // TODO manage retransmission of the response (send to the transport)
         // until ACK arrives, if no ACK is received within 64*T1, confirm dialog
         // and terminate it with a BYE
@@ -280,6 +282,7 @@ public class InviteHandler extends DialogMethodHandler
     }
 
     public void acceptCall(SipRequest sipRequest, Dialog dialog) {
+        logger.info("Accept call {}", sipRequest.getRequestUri().toString());
         sendSuccessfulResponse(sipRequest, dialog);
 
         dialog.receivedOrSent2xx();
@@ -316,7 +319,7 @@ public class InviteHandler extends DialogMethodHandler
 
         serverTransaction.receivedRequest(sipRequest);
 
-        serverTransaction.sendReponse(sipResponse);
+        serverTransaction.sendResponse(sipResponse);
 
         dialog.receivedOrSent300To699();
 

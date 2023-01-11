@@ -56,13 +56,13 @@ public class UacHangupTestNG {
         config.setMediaMode(MediaMode.none);
         user1SipListener = new UserSipListener();
         AbstractSoundManager soundManager = new DummySoundManager();
-        testUser1 = new UserAgent(user1SipListener, config, soundManager);
+        testUser1 = new UserAgent(user1SipListener, config);
 
         config = new JavaConfig();
         config.setLocalInetAddress(InetAddress.getLocalHost());
         config.setMediaMode(MediaMode.none);
         user2SipListener = new UserSipListener();
-        testUser2 = new UserAgent(user2SipListener, config, soundManager);
+        testUser2 = new UserAgent(user2SipListener, config);
 
     }
 

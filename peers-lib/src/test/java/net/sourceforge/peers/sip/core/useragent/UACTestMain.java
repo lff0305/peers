@@ -33,7 +33,7 @@ public class UACTestMain {
         SipRequest sipRequest;
         AbstractSoundManager soundManager = new DummySoundManager();
         try {
-            userAgent = new UserAgent(null, (String)null, soundManager);
+            userAgent = new UserAgent(null, (String)null);
             requestUri = "sip:bob@" + userAgent.getConfig()
                     .getLocalInetAddress().getHostAddress() + ":6060";
             sipRequest = userAgent.invite(requestUri,

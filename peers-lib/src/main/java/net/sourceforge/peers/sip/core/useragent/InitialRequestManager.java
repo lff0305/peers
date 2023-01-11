@@ -264,7 +264,7 @@ public class InitialRequestManager extends RequestManager
                             this, sipRequest);
             serverTransaction.start();
             serverTransaction.receivedRequest(sipRequest);
-            serverTransaction.sendReponse(sipResponse);
+            serverTransaction.sendResponse(sipResponse);
         }
 
         //TODO create server transaction

@@ -165,7 +165,7 @@ public class XmlConfig implements Config {
         }
         mediaModeNode = getFirstChild(documentElement, "mediaMode");
         if (isNullOrEmpty(mediaModeNode)) {
-            mediaMode = MediaMode.captureAndPlayback;
+            mediaMode = MediaMode.file;
         } else {
             mediaMode = MediaMode.valueOf(mediaModeNode.getTextContent());
         }

@@ -32,7 +32,7 @@ public class UASTestMain {
     public static void main(String[] args) {
         AbstractSoundManager soundManager = new DummySoundManager();
         try {
-            new UserAgent(null, (String) null, soundManager);
+            new UserAgent(null, (String) null);
         } catch (SocketException e) {
             e.printStackTrace();
         }

@@ -57,7 +57,7 @@ public abstract class Transaction {
         this.timer = timer;
         this.transportManager = transportManager;
         this.transactionManager = transactionManager;
-        responses = Collections.synchronizedList(new ArrayList<SipResponse>());
+        responses = Collections.synchronizedList(new ArrayList<>());
     }
 
     protected String getId() {

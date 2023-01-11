@@ -31,7 +31,7 @@ public class UACTestUasHangupMain {
         String requestUri;
         AbstractSoundManager soundManager = new DummySoundManager();
         try {
-            UserAgent userAgent = new UserAgent(null, (String) null, soundManager);
+            UserAgent userAgent = new UserAgent(null, (String) null);
             requestUri = "sip:bob@" + userAgent.getConfig()
                     .getLocalInetAddress().getHostAddress() + ":6060";
             userAgent.invite(requestUri,
