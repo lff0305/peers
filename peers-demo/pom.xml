@@ -1,33 +1,94 @@
 <?xml version="1.0"?>
-<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-  <modelVersion>4.0.0</modelVersion>
-  <groupId>net.sourceforge.peers</groupId>
-  <artifactId>peers-demo</artifactId>
-  <version>0.5.1-SNAPSHOT</version>
-  <name>peers-demo</name>
-  <url>http://maven.apache.org</url>
-  <properties>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <maven.compiler.source>17</maven.compiler.source>
-    <maven.compiler.target>17</maven.compiler.target>
-  </properties>
-  <dependencies>
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>4.13.1</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>peers-lib</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>peers-javaxsound</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-  </dependencies>
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+         xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>net.sourceforge.peers</groupId>
+    <artifactId>peers-demo</artifactId>
+    <version>0.5.1-SNAPSHOT</version>
+    <name>peers-demo</name>
+    <url>http://maven.apache.org</url>
+
+    <properties>
+
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
+        <jib.version>3.1.2</jib.version>
+        <timestamp>${maven.build.timestamp}</timestamp>
+        <maven.build.timestamp.format>yyyyMMddHHmmss</maven.build.timestamp.format>
+        <docker.base.image>docker.exm-platform.com/baseimages/openjdk:jre-17.0.4.1_1-ubuntu</docker.base.image>
+        <start-class>net.sourceforge.peers.demo.EventManager</start-class>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.13.1</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>peers-lib</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>peers-javaxsound</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+    </dependencies>
+
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>com.google.cloud.tools</groupId>
+                <artifactId>jib-maven-plugin</artifactId>
+                <version>${jib.version}</version>
+                <configuration>
+                    <from>
+                        <image>${docker.base.image}</image>
+                    </from>
+                    <to>
+                        <image>docker.exm-platform.com/internal/sip_tester:${user.name}-dev-${timestamp}</image>
+                    </to>
+                    <container>
+                        <entrypoint>/main.sh</entrypoint>
+                        <environment>
+                            <MAIN_CLASS>${start-class}</MAIN_CLASS>
+                            <CHECK_ENDPOINT>/control/health</CHECK_ENDPOINT>
+                            <JAVA_MEM_LIMIT>128m</JAVA_MEM_LIMIT>
+                            <GOOGLE_APPLICATION_CREDENTIALS>/telepathy.json</GOOGLE_APPLICATION_CREDENTIALS>
+                        </environment>
+                        <creationTime>USE_CURRENT_TIMESTAMP</creationTime>
+                    </container>
+                    <extraDirectories>
+                        <paths>
+                            <path>src/main/docker</path>
+                        </paths>
+                        <permissions>
+                            <permission>
+                                <file>/main.sh</file>
+                                <mode>755</mode>
+                                <!-- Read/write/execute for owner, read/execute for group/other -->
+                            </permission>
+                        </permissions>
+                    </extraDirectories>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>docker_push</id>
+                        <phase>install</phase>
+                        <goals>
+                            <goal>build</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+        </plugins>
+    </build>
+
 </project>
