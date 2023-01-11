@@ -131,8 +131,7 @@ public class InviteHandler extends DialogMethodHandler
         SipHeaders sipHeaders = sipRequest.getSipHeaders();
 
         // 12.2.2 update dialog
-        SipHeaderFieldValue contact =
-                sipHeaders.get(new SipHeaderFieldName(RFC3261.HDR_CONTACT));
+        SipHeaderFieldValue contact = sipHeaders.get(new SipHeaderFieldName(RFC3261.HDR_CONTACT));
         if (contact != null) {
             String contactStr = contact.getValue();
             if (contactStr.indexOf(RFC3261.LEFT_ANGLE_BRACKET) > -1) {
@@ -184,8 +183,7 @@ public class InviteHandler extends DialogMethodHandler
 
     private synchronized void sendSuccessfulResponse(SipRequest sipRequest, Dialog dialog) {
         SipHeaders reqHeaders = sipRequest.getSipHeaders();
-        SipHeaderFieldValue contentType =
-                reqHeaders.get(new SipHeaderFieldName(RFC3261.HDR_CONTENT_TYPE));
+        SipHeaderFieldValue contentType = reqHeaders.get(new SipHeaderFieldName(RFC3261.HDR_CONTENT_TYPE));
 
 
         if (RFC3261.CONTENT_TYPE_SDP.equals(contentType)) {
@@ -228,8 +226,7 @@ public class InviteHandler extends DialogMethodHandler
                 // create response in 200
                 try {
                     SessionDescription offer = sdpManager.parse(offerBytes);
-                    answer = sdpManager.createSessionDescription(offer,
-                            datagramSocket.getLocalPort());
+                    answer = sdpManager.createSessionDescription(offer, datagramSocket.getLocalPort());
                     mediaDestination = sdpManager.getMediaDestination(offer);
                 } catch (NoCodecException e) {
                     answer = sdpManager.createSessionDescription(null,
@@ -237,8 +234,7 @@ public class InviteHandler extends DialogMethodHandler
                 }
             } else {
                 // create offer in 200 (never tested...)
-                answer = sdpManager.createSessionDescription(null,
-                        datagramSocket.getLocalPort());
+                answer = sdpManager.createSessionDescription(null, datagramSocket.getLocalPort());
             }
             sipResponse.setBody(answer.toString().getBytes());
         } catch (IOException e) {
@@ -518,8 +514,7 @@ public class InviteHandler extends DialogMethodHandler
         }
 
         //added for media
-        SessionDescription sessionDescription =
-                sdpManager.parse(sipResponse.getBody());
+        SessionDescription sessionDescription = sdpManager.parse(sipResponse.getBody());
         try {
             mediaDestination = sdpManager.getMediaDestination(sessionDescription);
         } catch (NoCodecException e) {
@@ -528,11 +523,9 @@ public class InviteHandler extends DialogMethodHandler
         String remoteAddress = mediaDestination.getDestination();
         int remotePort = mediaDestination.getPort();
         Codec codec = mediaDestination.getCodec();
-        String localAddress = userAgent.getConfig()
-                .getLocalInetAddress().getHostAddress();
+        String localAddress = userAgent.getConfig().getLocalInetAddress().getHostAddress();
 
-        userAgent.getMediaManager().successResponseReceived(localAddress,
-                remoteAddress, remotePort, codec);
+        userAgent.getMediaManager().successResponseReceived(localAddress, remoteAddress, remotePort, codec);
 
         //switch to confirmed state
         dialog.receivedOrSent2xx();

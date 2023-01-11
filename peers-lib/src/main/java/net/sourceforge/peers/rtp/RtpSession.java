@@ -150,6 +150,10 @@ public class RtpSession {
 
     class Receiver implements Runnable {
 
+        final int noException = 0;
+        final int socketTimeoutException = 1;
+        final int ioException = 2;
+
         @Override
         public void run() {
             int receiveBufferSize;
@@ -161,9 +165,6 @@ public class RtpSession {
             }
             byte[] buf = new byte[receiveBufferSize];
             final DatagramPacket datagramPacket = new DatagramPacket(buf, buf.length);
-            final int noException = 0;
-            final int socketTimeoutException = 1;
-            final int ioException = 2;
             int result = 0;
             try {
                 datagramSocket.receive(datagramPacket);

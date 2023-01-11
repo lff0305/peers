@@ -117,15 +117,11 @@ public final class RFC3261 {
     //REASON PHRASES
     public static final String REASON_180_RINGING = "Ringing";
     public static final String REASON_200_OK = "OK";
-    public static final String REASON_405_METHOD_NOT_ALLOWED =
-            "Method Not Allowed";
-    public static final String REASON_481_CALL_TRANSACTION_DOES_NOT_EXIST =
-            "Call/Transaction Does Not Exist";
+    public static final String REASON_405_METHOD_NOT_ALLOWED = "Method Not Allowed";
+    public static final String REASON_481_CALL_TRANSACTION_DOES_NOT_EXIST = "Call/Transaction Does Not Exist";
     public static final String REASON_486_BUSYHERE = "Busy Here";
-    public static final String REASON_487_REQUEST_TERMINATED =
-            "Request Terminated";
-    public static final String REASON_500_SERVER_INTERNAL_ERROR =
-            "Server Internal Error";
+    public static final String REASON_487_REQUEST_TERMINATED = "Request Terminated";
+    public static final String REASON_500_SERVER_INTERNAL_ERROR = "Server Internal Error";
 
     //TRANSPORT
 
