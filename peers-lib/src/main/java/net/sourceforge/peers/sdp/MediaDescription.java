@@ -28,7 +28,7 @@ import java.util.List;
 public class MediaDescription {
 
     private String type;
-    private InetAddress ipAddress;
+    private String ipAddress;
     // attributes not codec-related
     private Hashtable<String, String> attributes;
     private int port;
@@ -50,11 +50,11 @@ public class MediaDescription {
         this.attributes = attributes;
     }
 
-    public InetAddress getIpAddress() {
+    public String getIpAddress() {
         return ipAddress;
     }
 
-    public void setIpAddress(InetAddress ipAddress) {
+    public void setIpAddress(String ipAddress) {
         this.ipAddress = ipAddress;
     }
 
@@ -86,17 +86,10 @@ public class MediaDescription {
         }
         buf.append("\r\n");
         if (ipAddress != null) {
-            int ipVersion;
-            if (ipAddress instanceof Inet4Address) {
-                ipVersion = 4;
-            } else if (ipAddress instanceof Inet6Address) {
-                ipVersion = 6;
-            } else {
-                throw new RuntimeException("unknown ip version: " + ipAddress);
-            }
+            int ipVersion = 4;
             buf.append(RFC4566.TYPE_CONNECTION).append(RFC4566.SEPARATOR);
             buf.append("IN IP").append(ipVersion).append(" ");
-            buf.append(ipAddress.getHostAddress()).append("\r\n");
+            buf.append(ipAddress).append("\r\n");
         }
         for (Codec codec : codecs) {
             buf.append(codec.toString());

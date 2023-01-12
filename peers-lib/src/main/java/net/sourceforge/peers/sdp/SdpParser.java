@@ -71,7 +71,7 @@ public class SdpParser {
         sessionDescription.setUsername(originArr[0]);
         sessionDescription.setId(Long.parseLong(originArr[1]));
         sessionDescription.setVersion(Long.parseLong(originArr[2]));
-        sessionDescription.setIpAddress(InetAddress.getByName(originArr[5]));
+        sessionDescription.setIpAddress(originArr[5]);
 
         //name
 
@@ -79,8 +79,7 @@ public class SdpParser {
         if (line.length() < 3) {
             return null;
         }
-        if (line.charAt(0) != RFC4566.TYPE_SUBJECT
-                || line.charAt(1) != RFC4566.SEPARATOR) {
+        if (line.charAt(0) != RFC4566.TYPE_SUBJECT   || line.charAt(1) != RFC4566.SEPARATOR) {
             return null;
         }
         sessionDescription.setName(line.substring(2));
@@ -98,7 +97,7 @@ public class SdpParser {
                 if (connection == null) {
                     continue;
                 }
-                sessionDescription.setIpAddress(InetAddress.getByName(connection));
+                sessionDescription.setIpAddress(connection);
             } else if (line.length() > 3
                     && line.charAt(0) == RFC4566.TYPE_ATTRIBUTE
                     && line.charAt(1) == RFC4566.SEPARATOR) {
@@ -175,7 +174,7 @@ public class SdpParser {
                 String sdpLineValue = sdpLine.getValue();
                 if (sdpLine.getType() == RFC4566.TYPE_CONNECTION) {
                     String ipAddress = parseConnection(sdpLineValue);
-                    mediaDescription.setIpAddress(InetAddress.getByName(ipAddress));
+                    mediaDescription.setIpAddress(ipAddress);
                 } else if (sdpLine.getType() == RFC4566.TYPE_ATTRIBUTE) {
                     Hashtable<String, String> attributes = mediaDescription.getAttributes();
                     int pos = sdpLineValue.indexOf(RFC4566.ATTR_SEPARATOR);
@@ -215,7 +214,7 @@ public class SdpParser {
 
         for (MediaDescription description : mediaDescriptions) {
             if (description.getIpAddress() == null) {
-                InetAddress sessionAddress = sessionDescription.getIpAddress();
+                String sessionAddress = sessionDescription.getIpAddress();
                 if (sessionAddress == null) {
                     return null;
                 }

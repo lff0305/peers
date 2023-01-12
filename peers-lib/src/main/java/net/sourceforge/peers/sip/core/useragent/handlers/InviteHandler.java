@@ -372,15 +372,12 @@ public class InviteHandler extends DialogMethodHandler
             datagramSocket = getDatagramSocket();
         }
         try {
-            SessionDescription sessionDescription =
-                    sdpManager.createSessionDescription(null,
-                            datagramSocket.getLocalPort());
+            SessionDescription sessionDescription = sdpManager.createSessionDescription(null, datagramSocket.getLocalPort());
             sipRequest.setBody(sessionDescription.toString().getBytes());
         } catch (IOException e) {
             logger.error(e.getMessage(), e);
         }
-        requestHeaders.add(new SipHeaderFieldName(RFC3261.HDR_CONTENT_TYPE),
-                new SipHeaderFieldValue(RFC3261.CONTENT_TYPE_SDP));
+        requestHeaders.add(new SipHeaderFieldName(RFC3261.HDR_CONTENT_TYPE), new SipHeaderFieldValue(RFC3261.CONTENT_TYPE_SDP));
         return clientTransaction;
     }
 

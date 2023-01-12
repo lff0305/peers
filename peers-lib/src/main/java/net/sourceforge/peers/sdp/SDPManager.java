@@ -75,7 +75,7 @@ public class SDPManager {
 
     public MediaDestination getMediaDestination(
             SessionDescription sessionDescription) throws NoCodecException {
-        InetAddress destAddress = sessionDescription.getIpAddress();
+        String destAddress = sessionDescription.getIpAddress();
         List<MediaDescription> mediaDescriptions = sessionDescription.getMediaDescriptions();
         for (MediaDescription mediaDescription : mediaDescriptions) {
             if (RFC4566.MEDIA_AUDIO.equals(mediaDescription.getType())) {
@@ -90,8 +90,7 @@ public class SDPManager {
                             }
                             MediaDestination mediaDestination =
                                     new MediaDestination();
-                            mediaDestination.setDestination(
-                                    destAddress.getHostAddress());
+                            mediaDestination.setDestination(destAddress);
                             mediaDestination.setPort(destPort);
                             mediaDestination.setCodec(offerCodec);
                             return mediaDestination;
@@ -103,19 +102,14 @@ public class SDPManager {
         throw new NoCodecException();
     }
 
-    public SessionDescription createSessionDescription(SessionDescription offer,
-                                                       int localRtpPort)
+    public SessionDescription createSessionDescription(SessionDescription offer, int localRtpPort)
             throws IOException {
         SessionDescription sessionDescription = new SessionDescription();
         sessionDescription.setUsername("user1");
         sessionDescription.setId(random.nextInt(Integer.MAX_VALUE));
         sessionDescription.setVersion(random.nextInt(Integer.MAX_VALUE));
         Config config = userAgent.getConfig();
-        InetAddress inetAddress = config.getPublicInetAddress();
-        if (inetAddress == null) {
-            inetAddress = config.getLocalInetAddress();
-        }
-        sessionDescription.setIpAddress(inetAddress);
+        sessionDescription.setIpAddress(config.getPublicAddress());
         sessionDescription.setName("-");
         sessionDescription.setAttributes(new Hashtable<String, String>());
         List<Codec> codecs;

@@ -31,7 +31,7 @@ public class SessionDescription {
     private long version;
     private String name;
     private String username;
-    private InetAddress ipAddress;
+    private String ipAddress;
     private List<MediaDescription> mediaDescriptions;
     private Hashtable<String, String> attributes;
 
@@ -43,11 +43,11 @@ public class SessionDescription {
         this.id = id;
     }
 
-    public InetAddress getIpAddress() {
+    public String getIpAddress() {
         return ipAddress;
     }
 
-    public void setIpAddress(InetAddress ipAddress) {
+    public void setIpAddress(String ipAddress) {
         this.ipAddress = ipAddress;
     }
 
@@ -97,16 +97,9 @@ public class SessionDescription {
         buf.append("v=0\r\n");
         buf.append("o=").append(username).append(" ").append(id);
         buf.append(" ").append(version);
-        int ipVersion;
-        if (ipAddress instanceof Inet4Address) {
-            ipVersion = 4;
-        } else if (ipAddress instanceof Inet6Address) {
-            ipVersion = 6;
-        } else {
-            throw new RuntimeException("unknown ip version: " + ipAddress);
-        }
+        int ipVersion = 4;
         buf.append(" IN IP").append(ipVersion).append(" ");
-        String hostAddress = ipAddress.getHostAddress();
+        String hostAddress = ipAddress;
         buf.append(hostAddress).append("\r\n");
         buf.append("s=").append(name).append("\r\n");
         buf.append("c=IN IP").append(ipVersion).append(" ");
