@@ -107,8 +107,7 @@ public class InitialRequestManager extends RequestManager
         //To
 
         NameAddress to = new NameAddress(requestUri);
-        headers.add(new SipHeaderFieldName(RFC3261.HDR_TO),
-                new SipHeaderFieldValue(to.toString()));
+        headers.add(new SipHeaderFieldName(RFC3261.HDR_TO), new SipHeaderFieldValue(to.toString()));
 
         //From
 
@@ -125,21 +124,18 @@ public class InitialRequestManager extends RequestManager
 
         //Call-ID
 
-        SipHeaderFieldName callIdName =
-                new SipHeaderFieldName(RFC3261.HDR_CALLID);
+        SipHeaderFieldName callIdName = new SipHeaderFieldName(RFC3261.HDR_CALLID);
         String localCallId;
         if (callId != null) {
             localCallId = callId;
         } else {
-            localCallId = Utils.generateCallID(
-                    userAgent.getConfig().getLocalInetAddress());
+            localCallId = Utils.generateCallID(userAgent.getConfig().getPublicAddress());
         }
         headers.add(callIdName, new SipHeaderFieldValue(localCallId));
 
         //CSeq
 
-        headers.add(new SipHeaderFieldName(RFC3261.HDR_CSEQ),
-                new SipHeaderFieldValue(userAgent.generateCSeq(method)));
+        headers.add(new SipHeaderFieldName(RFC3261.HDR_CSEQ), new SipHeaderFieldValue(userAgent.generateCSeq(method)));
 
         return request;
     }

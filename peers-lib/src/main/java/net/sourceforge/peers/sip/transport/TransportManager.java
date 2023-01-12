@@ -89,8 +89,7 @@ public class TransportManager {
     public MessageSender createClientTransport(SipRequest sipRequest,
                                                InetAddress inetAddress, int port, String transport)
             throws IOException {
-        return createClientTransport(sipRequest, inetAddress, port, transport,
-                NO_TTL);
+        return createClientTransport(sipRequest, inetAddress, port, transport, NO_TTL);
     }
 
     public MessageSender createClientTransport(SipRequest sipRequest,
@@ -122,19 +121,18 @@ public class TransportManager {
 
         //TODO user server connection
 
-        InetAddress myAddress = config.getPublicInetAddress();
+        String myAddress = config.getPublicAddress();
         if (myAddress == null) {
-            myAddress = config.getLocalInetAddress();
+            myAddress = config.getLocalAddress();
         }
 
-        buf.append(myAddress.getHostAddress()); //TODO use getHostName if real DNS
+        buf.append(myAddress); //TODO use getHostName if real DNS
         buf.append(TRANSPORT_PORT_SEP);
 
 
         if (sipPort < 1) {
             //use default port
-            if (TRANSPORT_TCP.equals(transport) || TRANSPORT_UDP.equals(transport)
-                    || TRANSPORT_SCTP.equals(transport)) {
+            if (TRANSPORT_TCP.equals(transport) || TRANSPORT_UDP.equals(transport) || TRANSPORT_SCTP.equals(transport)) {
                 sipPort = TRANSPORT_DEFAULT_PORT;
             } else if (TRANSPORT_SCTP.equals(transport)) {
                 sipPort = TRANSPORT_TLS_PORT;
@@ -385,8 +383,7 @@ public class TransportManager {
             //messageReceiver = new TcpMessageReceiver(port);
         }
         messageReceivers.put(sipTransportConnection, messageReceiver);
-        logger.info("added " + sipTransportConnection + ": " + messageReceiver
-                + " to message receivers");
+        logger.info("added " + sipTransportConnection + ": " + messageReceiver + " to message receivers");
         return messageReceiver;
     }
 

@@ -90,8 +90,7 @@ public class MediaManager {
         }
     }
 
-    public void successResponseReceived(String localAddress,
-                                        String remoteAddress, int remotePort, Codec codec) {
+    public void successResponseReceived(String localAddress, String remoteAddress, int remotePort, Codec codec) {
 
         logger.info("SuccessResponseReceived, media {}", userAgent.getMediaMode().toString());
 

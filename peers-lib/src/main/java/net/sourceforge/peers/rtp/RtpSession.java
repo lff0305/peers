@@ -72,7 +72,7 @@ public class RtpSession {
     }
 
     public synchronized void start() {
-        logger.info("RTP Session Start, mediaDebug = {}", this.mediaDebug);
+        logger.info("RTP Session Start, mediaDebug = {}, remoteAddress = {}, remotePort = {}", this.mediaDebug, this.remoteAddress, this.remotePort);
         if (mediaDebug) {
             SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
             String date = simpleDateFormat.format(new Date());
@@ -156,6 +156,9 @@ public class RtpSession {
 
         @Override
         public void run() {
+
+            logger.info("Receiver started {}", datagramSocket);
+
             int receiveBufferSize;
             try {
                 receiveBufferSize = datagramSocket.getReceiveBufferSize();

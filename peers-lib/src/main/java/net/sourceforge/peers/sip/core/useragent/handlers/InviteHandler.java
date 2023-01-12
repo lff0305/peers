@@ -147,7 +147,9 @@ public class InviteHandler extends DialogMethodHandler
     }
 
     private DatagramSocket getDatagramSocket() {
+
         DatagramSocket datagramSocket = userAgent.getMediaManager().getDatagramSocket();
+
         if (datagramSocket == null) { // initial invite success response
             // AccessController.doPrivileged added for plugin compatibility
             int rtpPort = userAgent.getConfig().getRtpPort();
@@ -227,14 +229,16 @@ public class InviteHandler extends DialogMethodHandler
                 try {
                     SessionDescription offer = sdpManager.parse(offerBytes);
                     answer = sdpManager.createSessionDescription(offer, datagramSocket.getLocalPort());
+                    logger.info("answer is {}", answer);
                     mediaDestination = sdpManager.getMediaDestination(offer);
                 } catch (NoCodecException e) {
-                    answer = sdpManager.createSessionDescription(null,
-                            datagramSocket.getLocalPort());
+                    answer = sdpManager.createSessionDescription(null, datagramSocket.getLocalPort());
+                    logger.info("answer is {}", answer);
                 }
             } else {
                 // create offer in 200 (never tested...)
                 answer = sdpManager.createSessionDescription(null, datagramSocket.getLocalPort());
+                logger.info("answer is {}", answer);
             }
             sipResponse.setBody(answer.toString().getBytes());
         } catch (IOException e) {
@@ -490,14 +494,12 @@ public class InviteHandler extends DialogMethodHandler
         //13.2.2.4
 
         List<String> peers = userAgent.getPeers();
-        String responseTo = responseHeaders.get(
-                new SipHeaderFieldName(RFC3261.HDR_TO)).getValue();
+        String responseTo = responseHeaders.get(new SipHeaderFieldName(RFC3261.HDR_TO)).getValue();
         if (!peers.contains(responseTo)) {
             peers.add(responseTo);
             //timer used to purge dialogs which are not confirmed
             //after a given time
-            ackTimer.schedule(new AckTimerTask(responseTo),
-                    64 * RFC3261.TIMER_T1);
+            ackTimer.schedule(new AckTimerTask(responseTo), 64 * RFC3261.TIMER_T1);
         }
 
         Dialog dialog = dialogManager.getDialog(sipResponse);
@@ -523,7 +525,9 @@ public class InviteHandler extends DialogMethodHandler
         String remoteAddress = mediaDestination.getDestination();
         int remotePort = mediaDestination.getPort();
         Codec codec = mediaDestination.getCodec();
-        String localAddress = userAgent.getConfig().getLocalInetAddress().getHostAddress();
+        String localAddress = userAgent.getConfig().getPublicAddress();
+
+        logger.info("Codec = {}, localAddr = {}, remoteAddr = {}, remotePort = {}", codec, localAddress, remoteAddress, remotePort);
 
         userAgent.getMediaManager().successResponseReceived(localAddress, remoteAddress, remotePort, codec);
 

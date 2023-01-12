@@ -64,11 +64,11 @@ public abstract class MessageSender {
 
     public String getContact() {
         StringBuffer buf = new StringBuffer();
-        InetAddress myAddress = config.getPublicInetAddress();
+        String myAddress = config.getPublicAddress();
         if (myAddress == null) {
-            myAddress = config.getLocalInetAddress();
+            myAddress = config.getLocalAddress();
         }
-        buf.append(myAddress.getHostAddress());
+        buf.append(myAddress);
         buf.append(RFC3261.TRANSPORT_PORT_SEP);
         //buf.append(config.getSipPort());
         buf.append(localPort);

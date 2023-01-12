@@ -49,6 +49,17 @@ public class Utils {
         return randomString(8);
     }
 
+    public final static String generateCallID(String inetAddress) {
+        //TODO make a hash using current time millis, public ip @, private @, and a random string
+        StringBuffer buf = new StringBuffer();
+        buf.append(randomString(8));
+        buf.append('-');
+        buf.append(String.valueOf(System.currentTimeMillis()));
+        buf.append('@');
+        buf.append(inetAddress);
+        return buf.toString();
+    }
+
     public final static String generateCallID(InetAddress inetAddress) {
         //TODO make a hash using current time millis, public ip @, private @, and a random string
         StringBuffer buf = new StringBuffer();
@@ -69,8 +80,7 @@ public class Utils {
     }
 
     public final static String getMessageCallId(SipMessage sipMessage) {
-        SipHeaderFieldValue callId = sipMessage.getSipHeaders().get(
-                new SipHeaderFieldName(RFC3261.HDR_CALLID));
+        SipHeaderFieldValue callId = sipMessage.getSipHeaders().get(new SipHeaderFieldName(RFC3261.HDR_CALLID));
         return callId.getValue();
     }
 
@@ -109,8 +119,7 @@ public class Utils {
         //Max-Forwards
 
         headers.add(new SipHeaderFieldName(RFC3261.HDR_MAX_FORWARDS),
-                new SipHeaderFieldValue(
-                        String.valueOf(RFC3261.DEFAULT_MAXFORWARDS)));
+                    new SipHeaderFieldValue(String.valueOf(RFC3261.DEFAULT_MAXFORWARDS)));
 
         //TODO Supported and Require
     }

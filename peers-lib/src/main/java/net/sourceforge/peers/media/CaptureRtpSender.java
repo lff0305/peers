@@ -91,12 +91,9 @@ public class CaptureRtpSender {
         encoder.setStopped(false);
         rtpSender.setStopped(false);
 
-        Thread captureThread = new Thread(capture,
-                Capture.class.getSimpleName());
-        Thread encoderThread = new Thread(encoder,
-                Encoder.class.getSimpleName());
-        Thread rtpSenderThread = new Thread(rtpSender,
-                RtpSender.class.getSimpleName());
+        Thread captureThread = new Thread(capture, Capture.class.getSimpleName());
+        Thread encoderThread = new Thread(encoder, Encoder.class.getSimpleName());
+        Thread rtpSenderThread = new Thread(rtpSender, RtpSender.class.getSimpleName());
 
         captureThread.start();
         encoderThread.start();

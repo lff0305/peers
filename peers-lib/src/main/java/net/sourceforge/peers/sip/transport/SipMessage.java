@@ -52,13 +52,10 @@ public abstract class SipMessage {
     }
 
     public void setBody(byte[] body) {
-        SipHeaderFieldName contentLengthName =
-                new SipHeaderFieldName(RFC3261.HDR_CONTENT_LENGTH);
-        SipHeaderFieldValue contentLengthValue =
-                sipHeaders.get(contentLengthName);
+        SipHeaderFieldName contentLengthName = new SipHeaderFieldName(RFC3261.HDR_CONTENT_LENGTH);
+        SipHeaderFieldValue contentLengthValue = sipHeaders.get(contentLengthName);
         if (contentLengthValue == null) {
-            contentLengthValue = new SipHeaderFieldValue(
-                    String.valueOf(body.length));
+            contentLengthValue = new SipHeaderFieldValue(String.valueOf(body.length));
             sipHeaders.add(contentLengthName, contentLengthValue);
         } else {
             contentLengthValue.setValue(String.valueOf(body.length));

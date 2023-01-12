@@ -30,7 +30,11 @@ public interface Config {
 
     public InetAddress getLocalInetAddress();
 
+    public String getLocalAddress();
+
     public InetAddress getPublicInetAddress();
+
+    public String getPublicAddress();
 
     public String getUserPart();
 

@@ -248,8 +248,18 @@ public class XmlConfig implements Config {
     }
 
     @Override
+    public String getLocalAddress() {
+        return null;
+    }
+
+    @Override
     public InetAddress getPublicInetAddress() {
         return publicInetAddress;
+    }
+
+    @Override
+    public String getPublicAddress() {
+        return null;
     }
 
     @Override

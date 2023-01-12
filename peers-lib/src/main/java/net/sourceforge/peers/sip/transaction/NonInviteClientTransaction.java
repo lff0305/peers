@@ -92,8 +92,7 @@ public class NonInviteClientTransaction extends NonInviteTransaction
         remoteInetAddress = inetAddress;
 
         try {
-            messageSender = transportManager.createClientTransport(
-                    request, remoteInetAddress, remotePort, transport);
+            messageSender = transportManager.createClientTransport(request, remoteInetAddress, remotePort, transport);
         } catch (IOException e) {
             logger.error("input/output error", e);
             transportError();

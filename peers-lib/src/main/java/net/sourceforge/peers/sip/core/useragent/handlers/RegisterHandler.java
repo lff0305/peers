@@ -110,16 +110,13 @@ public class RegisterHandler extends MethodHandler
                 .createClientTransaction(sipRequest, inetAddress, port,
                         transport, null, this);
         //TODO 10.2
-        SipHeaderFieldValue to = sipHeaders.get(
-                new SipHeaderFieldName(RFC3261.HDR_TO));
-        SipHeaderFieldValue from = sipHeaders.get(
-                new SipHeaderFieldName(RFC3261.HDR_FROM));
+        SipHeaderFieldValue to = sipHeaders.get(new SipHeaderFieldName(RFC3261.HDR_TO));
+        SipHeaderFieldValue from = sipHeaders.get(new SipHeaderFieldName(RFC3261.HDR_FROM));
         String fromValue = from.getValue();
         to.setValue(fromValue);
         requestUriStr = destinationUri.toString();
         profileUriStr = NameAddress.nameAddressToUri(fromValue);
-        callIDStr = sipHeaders.get(new SipHeaderFieldName(RFC3261.HDR_CALLID))
-                .toString();
+        callIDStr = sipHeaders.get(new SipHeaderFieldName(RFC3261.HDR_CALLID)).toString();
         // added for buggy servers like cirpack which doesn't answer with a
         // default expires value if it doesn't find any expires in request
         sipHeaders.add(new SipHeaderFieldName(RFC3261.HDR_EXPIRES),
@@ -218,19 +215,15 @@ public class RegisterHandler extends MethodHandler
         //meaningless
     }
 
-    public synchronized void successResponseReceived(SipResponse sipResponse,
-                                                     Transaction transaction) {
+    public synchronized void successResponseReceived(SipResponse sipResponse, Transaction transaction) {
         // 1. retrieve request corresponding to response
         // 2. if request was not an unregister, extract contact and expires,
         //    and start register refresh timer
         // 3. notify sip listener of register success event.
         SipRequest sipRequest = transaction.getRequest();
-        SipHeaderFieldName contactName = new SipHeaderFieldName(
-                RFC3261.HDR_CONTACT);
-        SipHeaderFieldValue requestContact = sipRequest.getSipHeaders()
-                .get(contactName);
-        SipHeaderParamName expiresParam = new SipHeaderParamName(
-                RFC3261.PARAM_EXPIRES);
+        SipHeaderFieldName contactName = new SipHeaderFieldName(RFC3261.HDR_CONTACT);
+        SipHeaderFieldValue requestContact = sipRequest.getSipHeaders().get(contactName);
+        SipHeaderParamName expiresParam = new SipHeaderParamName(RFC3261.PARAM_EXPIRES);
         String expires = requestContact.getParam(expiresParam);
         challenged = false;
         if (!"0".equals(expires)) {
@@ -252,8 +245,7 @@ public class RegisterHandler extends MethodHandler
                 if (delay == -1) {
                     delay = Integer.parseInt(expires) - REFRESH_MARGIN;
                 }
-                timer = new Timer(getClass().getSimpleName()
-                        + " refresh timer");
+                timer = new Timer(getClass().getSimpleName() + " refresh timer");
                 timer.schedule(new RefreshTimerTask(), delay * 1000);
             }
         }
