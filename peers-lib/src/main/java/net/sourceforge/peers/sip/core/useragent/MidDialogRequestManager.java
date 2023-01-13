@@ -183,6 +183,7 @@ public class MidDialogRequestManager extends RequestManager
 
         String method = sipRequest.getMethod();
         if (RFC3261.METHOD_BYE.equals(method)) {
+            logger.info("BYTE received");
             byeHandler.handleBye(sipRequest, dialog);
         } else if (RFC3261.METHOD_INVITE.equals(method)) {
             inviteHandler.handleReInvite(sipRequest, dialog);

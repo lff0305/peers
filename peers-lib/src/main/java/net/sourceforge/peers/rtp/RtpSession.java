@@ -56,7 +56,7 @@ public class RtpSession {
     private InetAddress remoteAddress;
     private int remotePort;
     private DatagramSocket datagramSocket;
-    private ExecutorService executorService;
+    private static ExecutorService executorService = Executors.newCachedThreadPool();
     private List<RtpListener> rtpListeners;
     private RtpParser rtpParser;
     private FileOutputStream rtpSessionOutput;
@@ -73,7 +73,6 @@ public class RtpSession {
         this.datagramSocket = datagramSocket;
         rtpListeners = new ArrayList<>();
         rtpParser = new RtpParser();
-        executorService = Executors.newSingleThreadExecutor();
     }
 
     public synchronized void start() {
@@ -97,6 +96,7 @@ public class RtpSession {
         executorService.submit(()-> {
             long ts = receiver.lastRTPTimestamp;
             long idle = 3000;
+            logger.info("Expire checker for {} started", callId);
             while (true) {
                 if (ts != 0 && System.currentTimeMillis() - ts > idle) {
                     logger.info("RTP expired for {}", idle, callId);
@@ -118,6 +118,7 @@ public class RtpSession {
                 }
             }
         });
+        logger.info("{} tasks added", callId);
     }
 
     public void stop() {
