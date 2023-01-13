@@ -40,6 +40,9 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.RejectedExecutionException;
 
 import net.sourceforge.peers.media.AbstractSoundManager;
+import net.sourceforge.peers.media.CaptureRtpSender;
+import net.sourceforge.peers.media.RTPManager;
+import net.sourceforge.peers.media.RtpSender;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -61,8 +64,10 @@ public class RtpSession {
     private boolean mediaDebug;
     private String peersHome;
 
-    public RtpSession(InetAddress localAddress, DatagramSocket datagramSocket,
-                      boolean mediaDebug, String peersHome) {
+    private final String callId;
+
+    public RtpSession(String callId, InetAddress localAddress, DatagramSocket datagramSocket, boolean mediaDebug, String peersHome) {
+        this.callId = callId;
         this.mediaDebug = mediaDebug;
         this.peersHome = peersHome;
         this.datagramSocket = datagramSocket;
@@ -87,7 +92,32 @@ public class RtpSession {
                 return;
             }
         }
-        executorService.submit(new Receiver());
+        Receiver receiver = new Receiver(callId);
+        executorService.submit(receiver);
+        executorService.submit(()-> {
+            long ts = receiver.lastRTPTimestamp;
+            long idle = 3000;
+            while (true) {
+                if (ts != 0 && System.currentTimeMillis() - ts > idle) {
+                    logger.info("RTP expired for {}", idle, callId);
+                }
+
+                CaptureRtpSender sender = RTPManager.getSender(callId);
+                if (sender == null) {
+                    logger.error("Failed to get sender for {}", callId);
+                    return;
+                }
+
+                RtpSender rtpSender = sender.getRtpSender();
+                rtpSender.sendWAV("i_want_to_make_an_appointment_for_my_car.wav");
+
+                try {
+                    Thread.sleep(50);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        });
     }
 
     public void stop() {
@@ -150,84 +180,59 @@ public class RtpSession {
 
     class Receiver implements Runnable {
 
-        final int noException = 0;
-        final int socketTimeoutException = 1;
-        final int ioException = 2;
+        private final String callId;
+
+        public Receiver(String callId) {
+            this.callId = callId;
+        }
+        private long lastRTPTimestamp = -1;
 
         @Override
         public void run() {
 
-            logger.info("Receiver started {}", datagramSocket);
+            logger.info("Receiver started {}", datagramSocket.getLocalPort());
 
-            int receiveBufferSize;
-            try {
-                receiveBufferSize = datagramSocket.getReceiveBufferSize();
-            } catch (SocketException e) {
-                logger.error("cannot get datagram socket receive buffer size", e);
-                return;
+            while (true) {
+                int receiveBufferSize;
+                try {
+                    receiveBufferSize = datagramSocket.getReceiveBufferSize();
+                } catch (SocketException e) {
+                    logger.error("cannot get datagram socket receive buffer size", e);
+                    return;
+                }
+                byte[] buf = new byte[receiveBufferSize];
+                final DatagramPacket datagramPacket = new DatagramPacket(buf, buf.length);
+                try {
+                    datagramSocket.receive(datagramPacket);
+                    logger.info("Received {}", datagramPacket.getData() == null ? 0: datagramPacket.getLength());
+                    lastRTPTimestamp = System.currentTimeMillis();
+                    process(datagramPacket);
+                    continue;
+                } catch (SocketTimeoutException e) {
+                    // no data
+                } catch (IOException e) {
+                    logger.error("cannot receive packet", e);
+                    return;
+                }
+                try {
+                    Thread.sleep(10);
+                } catch (InterruptedException e) {
+                    return;
+                }
             }
-            byte[] buf = new byte[receiveBufferSize];
-            final DatagramPacket datagramPacket = new DatagramPacket(buf, buf.length);
-            int result = 0;
-            try {
-                datagramSocket.receive(datagramPacket);
-                logger.info("Received {}", datagramPacket.getData() == null ? 0: datagramPacket.getLength());
-                result = noException;
-            } catch (SocketTimeoutException e) {
-                result =  socketTimeoutException;
-            } catch (IOException e) {
-                logger.error("cannot receive packet", e);
-                result = ioException;
-            }
+        }
 
-            switch (result) {
-                case socketTimeoutException:
-                    try {
-                        executorService.execute(this);
-                    } catch (RejectedExecutionException rej) {
-                        closeFileAndDatagramSocket();
-                    }
-                    return;
-                case ioException:
-                    return;
-                case noException:
-                    break;
-                default:
-                    break;
-            }
-            InetAddress remoteAddress = datagramPacket.getAddress();
-            if (remoteAddress != null &&
-                    !remoteAddress.equals(RtpSession.this.remoteAddress)) {
-                RtpSession.this.remoteAddress = remoteAddress;
-            }
-            int remotePort = datagramPacket.getPort();
-            if (remotePort != RtpSession.this.remotePort) {
-                RtpSession.this.remotePort = remotePort;
-            }
+        private void process(DatagramPacket datagramPacket) {
             byte[] data = datagramPacket.getData();
             int offset = datagramPacket.getOffset();
             int length = datagramPacket.getLength();
             byte[] trimmedData = new byte[length];
             System.arraycopy(data, offset, trimmedData, 0, length);
-            if (mediaDebug) {
-                try {
-                    rtpSessionInput.write(trimmedData);
-                } catch (IOException e) {
-                    logger.error("cannot write to file", e);
-                    return;
-                }
-            }
             RtpPacket rtpPacket = rtpParser.decode(trimmedData);
             for (RtpListener rtpListener : rtpListeners) {
                 rtpListener.receivedRtpPacket(rtpPacket);
             }
-            try {
-                executorService.execute(this);
-            } catch (RejectedExecutionException rej) {
-                closeFileAndDatagramSocket();
-            }
         }
-
     }
 
     public boolean isSocketClosed() {

@@ -66,7 +66,7 @@ public class IncomingRtpReader implements RtpListener {
         byte[] rawBuf = decoder.process(rtpPacket.getData());
         logger.info("Receive {} bytes from RTP", rawBuf.length);
         try {
-            FileOutputStream bos = new FileOutputStream("media.raw", true);
+            FileOutputStream bos = new FileOutputStream("/audio/media.raw", true);
             bos.write(rawBuf);
             bos.flush();
         } catch (Exception e) {

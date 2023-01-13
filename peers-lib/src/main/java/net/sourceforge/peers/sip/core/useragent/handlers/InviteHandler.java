@@ -373,6 +373,9 @@ public class InviteHandler extends DialogMethodHandler
         }
         try {
             SessionDescription sessionDescription = sdpManager.createSessionDescription(null, datagramSocket.getLocalPort());
+
+            logger.info("Description: {}", sessionDescription);
+
             sipRequest.setBody(sessionDescription.toString().getBytes());
         } catch (IOException e) {
             logger.error(e.getMessage(), e);
@@ -478,8 +481,9 @@ public class InviteHandler extends DialogMethodHandler
 
     public void successResponseReceived(SipResponse sipResponse, Transaction transaction) {
         SipHeaders responseHeaders = sipResponse.getSipHeaders();
-        String cseq = responseHeaders.get(
-                new SipHeaderFieldName(RFC3261.HDR_CSEQ)).getValue();
+
+        String callId = Utils.getMessageCallId(sipResponse);
+        String cseq = responseHeaders.get(new SipHeaderFieldName(RFC3261.HDR_CSEQ)).getValue();
         String method = cseq.substring(cseq.trim().lastIndexOf(' ') + 1);
         if (!RFC3261.METHOD_INVITE.equals(method)) {
             return;
@@ -526,7 +530,7 @@ public class InviteHandler extends DialogMethodHandler
 
         logger.info("Codec = {}, localAddr = {}, remoteAddr = {}, remotePort = {}", codec, localAddress, remoteAddress, remotePort);
 
-        userAgent.getMediaManager().successResponseReceived(localAddress, remoteAddress, remotePort, codec);
+        userAgent.getMediaManager().successResponseReceived(callId, localAddress, remoteAddress, remotePort, codec);
 
         //switch to confirmed state
         dialog.receivedOrSent2xx();
@@ -595,8 +599,7 @@ public class InviteHandler extends DialogMethodHandler
             return;
         }
         try {
-            MessageSender sender = transportManager.createClientTransport(
-                    ack, inetAddress, port, transport);
+            MessageSender sender = transportManager.createClientTransport(ack, inetAddress, port, transport);
             sender.sendMessage(ack);
         } catch (IOException e) {
             logger.error("input/output error", e);
@@ -604,7 +607,6 @@ public class InviteHandler extends DialogMethodHandler
 
 
         List<String> guiClosedCallIds = userAgent.getUac().getGuiClosedCallIds();
-        String callId = Utils.getMessageCallId(sipResponse);
         if (guiClosedCallIds.contains(callId)) {
             userAgent.terminate(request);
         }

@@ -19,11 +19,7 @@
 
 package net.sourceforge.peers.media;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.PipedInputStream;
+import java.io.*;
 import java.lang.invoke.MethodHandles;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -43,44 +39,21 @@ public class RtpSender implements Runnable {
 
     private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
-    private PipedInputStream encodedData;
     private RtpSession rtpSession;
     private boolean isStopped;
-    private FileOutputStream rtpSenderInput;
-    private boolean mediaDebug;
     private Codec codec;
     private List<RtpPacket> pushedPackets;
-    private String peersHome;
-    private CountDownLatch latch;
 
     public RtpSender(PipedInputStream encodedData, RtpSession rtpSession,
                      boolean mediaDebug, Codec codec, String peersHome,
                      CountDownLatch latch) {
-        this.encodedData = encodedData;
         this.rtpSession = rtpSession;
-        this.mediaDebug = mediaDebug;
         this.codec = codec;
-        this.peersHome = peersHome;
-        this.latch = latch;
         isStopped = false;
         pushedPackets = Collections.synchronizedList(new ArrayList<RtpPacket>());
     }
 
     public void run() {
-        if (mediaDebug) {
-            SimpleDateFormat simpleDateFormat =
-                    new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
-            String date = simpleDateFormat.format(new Date());
-            String fileName = peersHome + File.separator
-                    + AbstractSoundManager.MEDIA_DIR + File.separator + date
-                    + "_rtp_sender.input";
-            try {
-                rtpSenderInput = new FileOutputStream(fileName);
-            } catch (FileNotFoundException e) {
-                logger.error("cannot create file", e);
-                return;
-            }
-        }
         RtpPacket rtpPacket = new RtpPacket();
         rtpPacket.setVersion(2);
         rtpPacket.setPadding(false);
@@ -175,4 +148,41 @@ public class RtpSender implements Runnable {
         this.pushedPackets.addAll(rtpPackets);
     }
 
+    public void sendWAV(String file) {
+        try {
+            FileInputStream fis = new FileInputStream(file);
+            byte[] headers = new byte[44];
+            fis.read(headers);
+            byte[] buffer = new byte[320];
+            int size = fis.read(buffer);
+            PcmuEncoder encoder = new PcmuEncoder();
+            while (size != -1) {
+                byte[] data = encoder.process(buffer, size);
+                send(data);
+                size = fis.read(buffer);
+            }
+        } catch (FileNotFoundException e) {
+            logger.error("File not found {}", file, e);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private void send(byte[] data) {
+        RtpPacket rtpPacket = new RtpPacket();
+        rtpPacket.setVersion(2);
+        rtpPacket.setPadding(false);
+        rtpPacket.setExtension(false);
+        rtpPacket.setCsrcCount(0);
+        rtpPacket.setMarker(false);
+        rtpPacket.setPayloadType(codec.getPayloadType());
+        Random random = new Random();
+        int sequenceNumber = random.nextInt();
+        rtpPacket.setSequenceNumber(sequenceNumber);
+        rtpPacket.setSsrc(random.nextInt());
+
+        rtpPacket.setData(data);
+
+        pushedPackets.add(rtpPacket);
+    }
 }

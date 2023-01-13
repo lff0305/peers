@@ -80,8 +80,7 @@ public class InitialRequestManager extends RequestManager
      * @return
      * @throws SipUriSyntaxException
      */
-    public SipRequest getGenericRequest(String requestUri, String method,
-                                        String profileUri, String callId, String fromTag)
+    public SipRequest getGenericRequest(String requestUri, String method, String profileUri, String callId, String fromTag)
             throws SipUriSyntaxException {
         //8.1.1
         SipRequest request = new SipRequest(method, new SipURI(requestUri));
@@ -145,11 +144,9 @@ public class InitialRequestManager extends RequestManager
         return createInitialRequest(requestUri, method, profileUri, null);
     }
 
-    public SipRequest createInitialRequest(String requestUri, String method,
-                                           String profileUri, String callId) throws SipUriSyntaxException {
+    public SipRequest createInitialRequest(String requestUri, String method, String profileUri, String callId) throws SipUriSyntaxException {
 
-        return createInitialRequest(requestUri, method, profileUri, callId,
-                null, null);
+        return createInitialRequest(requestUri, method, profileUri, callId, null, null);
     }
 
     public SipRequest createInitialRequest(String requestUri, String method,
@@ -174,8 +171,7 @@ public class InitialRequestManager extends RequestManager
         } else if (RFC3261.METHOD_REGISTER.equals(method)) {
             clientTransaction = registerHandler.preProcessRegister(sipRequest);
         }
-        createInitialRequestEnd(sipRequest, clientTransaction, profileUri,
-                messageInterceptor, true);
+        createInitialRequestEnd(sipRequest, clientTransaction, profileUri, messageInterceptor, true);
         return sipRequest;
     }
 

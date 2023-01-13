@@ -106,10 +106,7 @@ public class PcmuEncoder extends Encoder {
         return (size);
     }
 
-    public PcmuEncoder(PipedInputStream rawData, PipedOutputStream encodedData,
-                       boolean mediaDebug, String peersHome,
-                       CountDownLatch latch) {
-        super(rawData, encodedData, mediaDebug, peersHome, latch);
+    public PcmuEncoder() {
     }
 
     /**
@@ -119,8 +116,8 @@ public class PcmuEncoder extends Encoder {
      * @param media the input uncompressed media
      * @return the output compressed media.
      */
-    public byte[] process(byte[] media) {
-        byte[] compressed = new byte[media.length / 2];
+    public byte[] process(byte[] media, int size) {
+        byte[] compressed = new byte[size / 2];
 
         int j = 0;
         for (int i = 0; i < compressed.length; i++) {

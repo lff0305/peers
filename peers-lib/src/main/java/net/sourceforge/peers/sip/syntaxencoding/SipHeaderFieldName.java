@@ -21,8 +21,7 @@ package net.sourceforge.peers.sip.syntaxencoding;
 
 public class SipHeaderFieldName {
 
-    private final static SipHeadersTable SIP_HEADER_TABLE =
-            new SipHeadersTable();
+    private final static SipHeadersTable SIP_HEADER_TABLE = new SipHeadersTable();
 
     private String name;
 

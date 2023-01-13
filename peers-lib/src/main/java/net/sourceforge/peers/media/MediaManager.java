@@ -51,10 +51,9 @@ public class MediaManager {
         dtmfFactory = new DtmfFactory();
     }
 
-    private void startRtpSessionOnSuccessResponse(String localAddress, String remoteAddress, int remotePort, Codec codec,
-                                                  SoundSource soundSource) {
+    private void startRtpSessionOnSuccessResponse(String callId, String localAddress, String remoteAddress, int remotePort, Codec codec) {
 
-        logger.info("startRtpSessionOnSuccessResponse");
+        logger.info("startRtpSessionOnSuccessResponse {}", callId);
 
         InetAddress inetAddress;
         try {
@@ -64,7 +63,7 @@ public class MediaManager {
             return;
         }
 
-        rtpSession = new RtpSession(inetAddress, datagramSocket, userAgent.isMediaDebug(), userAgent.getPeersHome());
+        rtpSession = new RtpSession(callId, inetAddress, datagramSocket, userAgent.isMediaDebug(), userAgent.getPeersHome());
 
         try {
             inetAddress = InetAddress.getByName(remoteAddress);
@@ -76,8 +75,9 @@ public class MediaManager {
 
 
         try {
-            captureRtpSender = new CaptureRtpSender(rtpSession, soundSource, userAgent.isMediaDebug(), codec, userAgent.getPeersHome());
-            logger.info("CaptureRtpSender created");
+            captureRtpSender = new CaptureRtpSender(rtpSession, userAgent.isMediaDebug(), codec, userAgent.getPeersHome());
+            logger.info("CaptureRtpSender created for {}", callId);
+            RTPManager.pubSender(callId, captureRtpSender);
         } catch (IOException e) {
             logger.error("input/output error", e);
             return;
@@ -90,9 +90,9 @@ public class MediaManager {
         }
     }
 
-    public void successResponseReceived(String localAddress, String remoteAddress, int remotePort, Codec codec) {
+    public void successResponseReceived(String callId, String localAddress, String remoteAddress, int remotePort, Codec codec) {
 
-        logger.info("SuccessResponseReceived, media {}", userAgent.getMediaMode().toString());
+        logger.info("SuccessResponseReceived, {} media {}", callId, userAgent.getMediaMode().toString());
 
         switch (userAgent.getMediaMode()) {
             case echo:
@@ -109,8 +109,7 @@ public class MediaManager {
                 echoThread.start();
                 break;
             case file:
-                String fileName = userAgent.getConfig().getMediaFile();
-                startRtpSessionOnSuccessResponse(localAddress, remoteAddress, remotePort, codec, fileReader);
+                startRtpSessionOnSuccessResponse(callId, localAddress, remoteAddress, remotePort, codec);
                 try {
                     incomingRtpReader = new IncomingRtpReader(captureRtpSender.getRtpSession(), null, codec);
                 } catch (IOException e) {
@@ -125,13 +124,11 @@ public class MediaManager {
         }
     }
 
-    private void startRtpSession(String destAddress, int destPort,
-                                 Codec codec, SoundSource soundSource) {
+    private void startRtpSession(String destAddress, int destPort, Codec codec, SoundSource soundSource) {
 
         logger.info("Start RTP Session");
 
-        rtpSession = new RtpSession(userAgent.getConfig().getLocalInetAddress(), datagramSocket,
-                userAgent.isMediaDebug(), userAgent.getPeersHome());
+        rtpSession = new RtpSession(null, userAgent.getConfig().getLocalInetAddress(), datagramSocket, userAgent.isMediaDebug(), userAgent.getPeersHome());
 
         try {
             InetAddress inetAddress = InetAddress.getByName(destAddress);
@@ -142,9 +139,7 @@ public class MediaManager {
         rtpSession.setRemotePort(destPort);
 
         try {
-            captureRtpSender = new CaptureRtpSender(rtpSession,
-                    soundSource, userAgent.isMediaDebug(), codec,
-                    userAgent.getPeersHome());
+            captureRtpSender = new CaptureRtpSender(rtpSession, userAgent.isMediaDebug(), codec, userAgent.getPeersHome());
         } catch (IOException e) {
             logger.error("input/output error", e);
             return;

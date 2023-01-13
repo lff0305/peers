@@ -51,15 +51,12 @@ public class PcmaEncoder extends Encoder {
             7, 7, 7, 7, 7, 7, 7, 7
     };
 
-    public PcmaEncoder(PipedInputStream rawData, PipedOutputStream encodedData,
-                       boolean mediaDebug, String peersHome,
-                       CountDownLatch latch) {
-        super(rawData, encodedData, mediaDebug, peersHome, latch);
+    public PcmaEncoder() {
     }
 
     @Override
-    public byte[] process(byte[] media) {
-        byte[] compressed = new byte[media.length / 2];
+    public byte[] process(byte[] media, int size) {
+        byte[] compressed = new byte[size / 2];
 
         int j = 0;
         for (int i = 0; i < compressed.length; i++) {

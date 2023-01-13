@@ -130,15 +130,12 @@ public class UAC {
 
     SipRequest invite(String requestUri, String callId)
             throws SipUriSyntaxException {
-        return initialRequestManager.createInitialRequest(requestUri,
-                RFC3261.METHOD_INVITE, profileUri, callId);
+        return initialRequestManager.createInitialRequest(requestUri, RFC3261.METHOD_INVITE, profileUri, callId);
 
     }
 
     private SipRequest getInviteWithAuth(String callId) {
-        List<ClientTransaction> clientTransactions =
-                transactionManager.getClientTransactionsFromCallId(callId,
-                        RFC3261.METHOD_INVITE);
+        List<ClientTransaction> clientTransactions = transactionManager.getClientTransactionsFromCallId(callId, RFC3261.METHOD_INVITE);
         SipRequest sipRequestNoAuth = null;
         for (ClientTransaction clientTransaction : clientTransactions) {
             InviteClientTransaction inviteClientTransaction =
@@ -149,8 +146,7 @@ public class UAC {
                     RFC3261.HDR_AUTHORIZATION);
             SipHeaderFieldValue value = sipHeaders.get(authorization);
             if (value == null) {
-                SipHeaderFieldName proxyAuthorization = new SipHeaderFieldName(
-                        RFC3261.HDR_PROXY_AUTHORIZATION);
+                SipHeaderFieldName proxyAuthorization = new SipHeaderFieldName(RFC3261.HDR_PROXY_AUTHORIZATION);
                 value = sipHeaders.get(proxyAuthorization);
             }
             if (value != null) {

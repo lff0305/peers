@@ -39,11 +39,10 @@ public class CaptureRtpSender {
     public static final int PIPE_SIZE = 4096;
 
     private RtpSession rtpSession;
-    private Capture capture;
     private Encoder encoder;
     private RtpSender rtpSender;
 
-    public CaptureRtpSender(RtpSession rtpSession, SoundSource soundSource, boolean mediaDebug, Codec codec, String peersHome)
+    public CaptureRtpSender(RtpSession rtpSession, boolean mediaDebug, Codec codec, String peersHome)
             throws IOException {
         super();
         this.rtpSession = rtpSession;
@@ -69,13 +68,12 @@ public class CaptureRtpSender {
             rawDataInput.close();
             return;
         }
-        capture = new Capture(rawDataOutput, soundSource, latch);
         switch (codec.getPayloadType()) {
             case RFC3551.PAYLOAD_TYPE_PCMU:
-                encoder = new PcmuEncoder(rawDataInput, encodedDataOutput, mediaDebug, peersHome, latch);
+                encoder = new PcmuEncoder();
                 break;
             case RFC3551.PAYLOAD_TYPE_PCMA:
-                encoder = new PcmaEncoder(rawDataInput, encodedDataOutput, mediaDebug, peersHome, latch);
+                encoder = new PcmaEncoder();
                 break;
             default:
                 encodedDataInput.close();
@@ -87,27 +85,15 @@ public class CaptureRtpSender {
 
     public void start() throws IOException {
 
-        capture.setStopped(false);
-        encoder.setStopped(false);
         rtpSender.setStopped(false);
 
-        Thread captureThread = new Thread(capture, Capture.class.getSimpleName());
-        Thread encoderThread = new Thread(encoder, Encoder.class.getSimpleName());
         Thread rtpSenderThread = new Thread(rtpSender, RtpSender.class.getSimpleName());
 
-        captureThread.start();
-        encoderThread.start();
         rtpSenderThread.start();
 
     }
 
     public void stop() {
-        if (capture != null) {
-            capture.setStopped(true);
-        }
-        if (encoder != null) {
-            encoder.setStopped(true);
-        }
         if (rtpSender != null) {
             rtpSender.setStopped(true);
         }
