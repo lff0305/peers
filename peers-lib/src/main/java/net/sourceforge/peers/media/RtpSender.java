@@ -39,20 +39,20 @@ public class RtpSender implements Runnable {
 
     private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
+    static Random random = new Random();
     private RtpSession rtpSession;
     private boolean isStopped;
     private Codec codec;
     private List<RtpPacket> pushedPackets;
 
-    public RtpSender(PipedInputStream encodedData, RtpSession rtpSession,
-                     boolean mediaDebug, Codec codec, String peersHome,
-                     CountDownLatch latch) {
+    public RtpSender(RtpSession rtpSession, Codec codec) {
         this.rtpSession = rtpSession;
         this.codec = codec;
         isStopped = false;
         pushedPackets = Collections.synchronizedList(new ArrayList<RtpPacket>());
     }
 
+    private int seq = 0;
     public void run() {
         RtpPacket rtpPacket = new RtpPacket();
         rtpPacket.setVersion(2);
@@ -90,6 +90,7 @@ public class RtpSender implements Runnable {
                 RtpPacket pushedPacket = pushedPackets.remove(0);
                 rtpPacket.setMarker(pushedPacket.isMarker());
                 rtpPacket.setPayloadType(pushedPacket.getPayloadType());
+                rtpPacket.setSequenceNumber(this.seq ++);
                 rtpPacket.setIncrementTimeStamp(pushedPacket.isIncrementTimeStamp());
                 byte[] data = pushedPacket.getData();
                 rtpPacket.setData(data);
@@ -176,13 +177,10 @@ public class RtpSender implements Runnable {
         rtpPacket.setCsrcCount(0);
         rtpPacket.setMarker(false);
         rtpPacket.setPayloadType(codec.getPayloadType());
-        Random random = new Random();
         int sequenceNumber = random.nextInt();
         rtpPacket.setSequenceNumber(sequenceNumber);
         rtpPacket.setSsrc(random.nextInt());
-
         rtpPacket.setData(data);
-
         pushedPackets.add(rtpPacket);
     }
 }

@@ -49,25 +49,6 @@ public class CaptureRtpSender {
         // the use of PipedInputStream and PipedOutputStream in Capture,
         // Encoder and RtpSender imposes a synchronization point at the
         // end of life of those threads to a void read end dead exceptions
-        CountDownLatch latch = new CountDownLatch(3);
-        PipedOutputStream rawDataOutput = new PipedOutputStream();
-        PipedInputStream rawDataInput;
-        try {
-            rawDataInput = new PipedInputStream(rawDataOutput, PIPE_SIZE);
-        } catch (IOException e) {
-            logger.error("input/output error", e);
-            return;
-        }
-
-        PipedOutputStream encodedDataOutput = new PipedOutputStream();
-        PipedInputStream encodedDataInput;
-        try {
-            encodedDataInput = new PipedInputStream(encodedDataOutput, PIPE_SIZE);
-        } catch (IOException e) {
-            logger.error("input/output error");
-            rawDataInput.close();
-            return;
-        }
         switch (codec.getPayloadType()) {
             case RFC3551.PAYLOAD_TYPE_PCMU:
                 encoder = new PcmuEncoder();
@@ -76,11 +57,9 @@ public class CaptureRtpSender {
                 encoder = new PcmaEncoder();
                 break;
             default:
-                encodedDataInput.close();
-                rawDataInput.close();
                 throw new RuntimeException("unknown payload type");
         }
-        rtpSender = new RtpSender(encodedDataInput, rtpSession, mediaDebug, codec, peersHome, latch);
+        rtpSender = new RtpSender(rtpSession, codec);
     }
 
     public void start() throws IOException {

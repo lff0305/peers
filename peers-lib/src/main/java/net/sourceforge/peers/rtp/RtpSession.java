@@ -35,14 +35,12 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.RejectedExecutionException;
 
-import net.sourceforge.peers.media.AbstractSoundManager;
-import net.sourceforge.peers.media.CaptureRtpSender;
-import net.sourceforge.peers.media.RTPManager;
-import net.sourceforge.peers.media.RtpSender;
+import net.sourceforge.peers.media.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -65,6 +63,8 @@ public class RtpSession {
     private String peersHome;
 
     private final String callId;
+
+    static Random random = new Random();
 
     public RtpSession(String callId, InetAddress localAddress, DatagramSocket datagramSocket, boolean mediaDebug, String peersHome) {
         this.callId = callId;
@@ -94,23 +94,55 @@ public class RtpSession {
         Receiver receiver = new Receiver(callId);
         executorService.submit(receiver);
         executorService.submit(()-> {
-            long ts = receiver.lastRTPTimestamp;
-            long idle = 3000;
+            long idle = 5000;
             logger.info("Expire checker for {} started", callId);
             while (true) {
-                if (ts != 0 && System.currentTimeMillis() - ts > idle) {
-                    logger.info("RTP expired for {}", idle, callId);
+                long ts = receiver.lastRTPTimestamp;
+                long delta = System.currentTimeMillis() - ts;
+                if (ts != -1 &&  delta > idle) {
+                    logger.info("RTP expired for {}", callId, delta);
+
+                    CaptureRtpSender sender = RTPManager.getSender(callId);
+                    if (sender == null) {
+                        logger.error("Failed to get sender for {}", callId);
+                        return;
+                    }
+
+                    RtpSender rtpSender = sender.getRtpSender();
+
+
+                    List<RtpPacket> rtpPackets = DtmfFactory.createDtmfPackets('9');
+                    rtpSender.pushPackets(rtpPackets);
+                    try {
+                        Thread.sleep(250);
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
+                    rtpPackets = DtmfFactory.createDtmfPackets('9');
+                    rtpSender.pushPackets(rtpPackets);
+                    try {
+                        Thread.sleep(250);
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
+                    rtpPackets = DtmfFactory.createDtmfPackets('9');
+                    rtpSender.pushPackets(rtpPackets);
+                    try {
+                        Thread.sleep(250);
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
+                    rtpPackets = DtmfFactory.createDtmfPackets('9');
+                    rtpSender.pushPackets(rtpPackets);
+
+
+                    receiver.lastRTPTimestamp = -1;
+//                    rtpSender.sendWAV("/audio/i_want_to_make_an_appointment_for_my_car.wav");
+//                    receiver.lastRTPTimestamp = -1;
+
+                } else {
+                    // wait for next round
                 }
-
-                CaptureRtpSender sender = RTPManager.getSender(callId);
-                if (sender == null) {
-                    logger.error("Failed to get sender for {}", callId);
-                    return;
-                }
-
-                RtpSender rtpSender = sender.getRtpSender();
-                rtpSender.sendWAV("i_want_to_make_an_appointment_for_my_car.wav");
-
                 try {
                     Thread.sleep(50);
                 } catch (InterruptedException e) {
@@ -143,7 +175,7 @@ public class RtpSession {
         final DatagramPacket datagramPacket = new DatagramPacket(buf, buf.length, remoteAddress, remotePort);
         if (!datagramSocket.isClosed()) {
             try {
-                logger.info("Send RTP {} bytes", buf.length);
+                logger.info("Send RTP {} bytes to {} {}", buf.length, remoteAddress, remotePort);
                 datagramSocket.send(datagramPacket);
             } catch (IOException e) {
                 logger.error("Failed to send", e);
@@ -186,12 +218,12 @@ public class RtpSession {
         public Receiver(String callId) {
             this.callId = callId;
         }
-        private long lastRTPTimestamp = -1;
+        private volatile long lastRTPTimestamp = -1;
 
         @Override
         public void run() {
 
-            logger.info("Receiver started {}", datagramSocket.getLocalPort());
+            logger.info("{} Receiver started {}", callId, datagramSocket.getLocalPort());
 
             while (true) {
                 int receiveBufferSize;

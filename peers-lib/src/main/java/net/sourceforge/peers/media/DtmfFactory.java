@@ -27,7 +27,7 @@ import java.util.List;
 
 public class DtmfFactory {
 
-    public List<RtpPacket> createDtmfPackets(char digit) {
+    public static List<RtpPacket> createDtmfPackets(char digit) {
         List<RtpPacket> packets = new ArrayList<RtpPacket>();
         byte[] data = new byte[4];
         // RFC4733
