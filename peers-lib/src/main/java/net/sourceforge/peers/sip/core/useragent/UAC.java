@@ -23,6 +23,7 @@ import java.lang.invoke.MethodHandles;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 
 import net.sourceforge.peers.sip.RFC3261;
 import net.sourceforge.peers.sip.Utils;
@@ -90,7 +91,8 @@ public class UAC {
         String requestUri = RFC3261.SIP_SCHEME + RFC3261.SCHEME_SEPARATOR + domain;
         SipListener sipListener = userAgent.getSipListener();
         profileUri = RFC3261.SIP_SCHEME + RFC3261.SCHEME_SEPARATOR + userAgent.getUserpart() + RFC3261.AT + domain;
-        registerCallID = Utils.generateCallID(userAgent.getConfig().getPublicAddress());
+    //    registerCallID = Utils.generateCallID(userAgent.getConfig().getPublicAddress());
+        registerCallID = UUID.randomUUID().toString();
 
         SipRequest sipRequest = initialRequestManager.createInitialRequest(
                 requestUri, RFC3261.METHOD_REGISTER, profileUri,

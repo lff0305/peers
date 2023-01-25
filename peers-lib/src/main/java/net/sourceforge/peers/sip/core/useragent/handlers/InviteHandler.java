@@ -80,8 +80,7 @@ public class InviteHandler extends DialogMethodHandler
                          TransactionManager transactionManager,
                          TransportManager transportManager) {
         super(userAgent, dialogManager, transactionManager, transportManager);
-        ackTimer = new Timer(getClass().getSimpleName() + " Ack "
-                + Timer.class.getSimpleName());
+        ackTimer = new Timer(getClass().getSimpleName() + " Ack " + Timer.class.getSimpleName());
     }
 
 
@@ -92,8 +91,7 @@ public class InviteHandler extends DialogMethodHandler
     public void handleInitialInvite(SipRequest sipRequest) {
         initialIncomingInvite = true;
         //generate 180 Ringing
-        SipResponse sipResponse = buildGenericResponse(sipRequest,
-                RFC3261.CODE_180_RINGING, RFC3261.REASON_180_RINGING);
+        SipResponse sipResponse = buildGenericResponse(sipRequest, RFC3261.CODE_180_RINGING, RFC3261.REASON_180_RINGING);
         Dialog dialog = buildDialogForUas(sipResponse, sipRequest);
         //here dialog is already stored in dialogs in DialogManager
 
